@@ -1,170 +1,277 @@
-export interface BasisBlock {
-  id: string;
-  label: string;
-  amount: number;
-  color: "green" | "blue" | "red" | "amber" | "purple";
-  stack: "stock" | "debt";
-}
+import type { StepConfig } from "@/types";
 
-export interface StepConfig {
-  id: number;
-  title: string;
-  subtitle: string;
-  narration: string[];
-  highlightRule?: string;
-  blocks: BasisBlock[];
-  suspendedLoss?: number;
-  capitalGain?: number;
-  showDebtStack?: boolean;
-  flashZero?: boolean;
-}
+// Max basis across all steps — used as the 100% height reference
+export const MAX_BASIS_REFERENCE = 87000;
 
 export const STEPS: StepConfig[] = [
+  // ── Step 1: Initial Capital Contribution ──
   {
     id: 1,
-    title: "Initial Capital Contribution",
-    subtitle: "The Foundation of Stock Basis",
+    title: "Your Starting Basis",
     narration: [
-      "When a shareholder invests money in their S-Corporation, that initial capital contribution becomes the foundation of their stock basis.",
-      "Think of basis as a stack of building blocks. Your initial investment is the very first block — the foundation everything else is built on.",
-      "For example, if you invest $50,000 to start your S-Corp, your beginning stock basis is $50,000.",
+      "Hey! So you just put $50,000 into your S-Corp.",
+      "That's your starting basis — think of it like building a tower of blocks.",
+      "This is your foundation. Everything we talk about either builds on top of this tower... or chips away at it.",
     ],
-    highlightRule: "IRC §1366(d)(1)(A) — Basis begins with the shareholder's initial investment in the corporation's stock.",
-    blocks: [
+    highlightRule:
+      "IRC \u00A71366(d)(1)(A) \u2014 Basis starts with your initial investment in the corporation\u2019s stock.",
+    stockTotal: 50000,
+    debtTotal: 0,
+    sections: [
       { id: "initial", label: "Initial Investment", amount: 50000, color: "blue", stack: "stock" },
     ],
     showDebtStack: false,
+    benjiPose: "waving",
+    interactiveButtons: [
+      {
+        label: "+$10K More Investment",
+        amountDelta: 10000,
+        stack: "stock",
+        color: "green",
+        benjiReaction: "More capital in! Your foundation just got bigger.",
+      },
+    ],
   },
+
+  // ── Step 2: Income Increases Basis ──
   {
     id: 2,
-    title: "Basis Increases with Income",
-    subtitle: "Income Items Stack Up",
+    title: "Income Stacks Up",
     narration: [
-      "As the S-Corp earns income, those earnings pass through to the shareholder and increase stock basis.",
-      "Ordinary business income, separately stated income items (like interest and dividends), and tax-exempt income all add blocks to your stack.",
-      "Each income item becomes a new building block stacked on top of your foundation.",
+      "Nice! Your business earned some money this year.",
+      "Ordinary income, interest, dividends, even tax-exempt income \u2014 they ALL add to your basis.",
+      "Watch your tower grow! You went from $50K to $87K. That\u2019s $37,000 in new blocks stacked right on top.",
     ],
-    highlightRule: "IRC §1367(a)(1) — Stock basis is increased by the shareholder's pro rata share of income items.",
-    blocks: [
+    highlightRule:
+      "IRC \u00A71367(a)(1) \u2014 Stock basis increases by the shareholder\u2019s pro rata share of all income items.",
+    stockTotal: 87000,
+    debtTotal: 0,
+    sections: [
       { id: "initial", label: "Initial Investment", amount: 50000, color: "blue", stack: "stock" },
-      { id: "ordinary-income", label: "Ordinary Income", amount: 30000, color: "green", stack: "stock" },
-      { id: "interest-income", label: "Interest Income", amount: 5000, color: "green", stack: "stock" },
+      { id: "ordinary", label: "Ordinary Income", amount: 30000, color: "green", stack: "stock" },
+      { id: "interest", label: "Interest Income", amount: 5000, color: "green", stack: "stock" },
       { id: "tax-exempt", label: "Tax-Exempt Income", amount: 2000, color: "green", stack: "stock" },
     ],
     showDebtStack: false,
+    benjiPose: "presenting",
+    interactiveButtons: [
+      {
+        label: "+$10K Income",
+        amountDelta: 10000,
+        stack: "stock",
+        color: "green",
+        benjiReaction: "More income! Watch the tower stack up!",
+      },
+      {
+        label: "+$5K Tax-Exempt",
+        amountDelta: 5000,
+        stack: "stock",
+        color: "green",
+        benjiReaction: "Tax-exempt income is the best kind \u2014 it grows your basis without any tax!",
+      },
+    ],
   },
+
+  // ── Step 3: Basis Decreases ──
   {
     id: 3,
-    title: "Basis Decreases",
-    subtitle: "Distributions, Expenses & Losses",
+    title: "Taking Money Out",
     narration: [
-      "Now the basis stack starts to shrink. Three things reduce your stock basis:",
-      "1. Distributions — cash or property the S-Corp pays you.",
-      "2. Non-deductible expenses — like meals (50%) and penalties.",
-      "3. Losses and deductions — the S-Corp's ordinary losses and separately stated deduction items.",
-      "The ordering matters. Distributions reduce basis first, then non-deductible expenses, then losses.",
+      "Uh oh \u2014 time to take some money out.",
+      "Three things shrink your tower: distributions (cash you take out), non-deductible expenses (like meals and penalties), and losses.",
+      "The order matters! Distributions come off first, then expenses, then losses. See how the tower gets shorter?",
+      "You went from $87K all the way down to $49K.",
     ],
-    highlightRule: "IRC §1367(a)(2) — Basis is decreased (but not below zero) by distributions, non-deductible expenses, and the shareholder's share of losses.",
-    blocks: [
+    highlightRule:
+      "IRC \u00A71367(a)(2) \u2014 Basis decreases (but not below zero) by distributions, non-deductible expenses, and losses \u2014 in that order.",
+    stockTotal: 49000,
+    debtTotal: 0,
+    sections: [
       { id: "initial", label: "Initial Investment", amount: 50000, color: "blue", stack: "stock" },
-      { id: "ordinary-income", label: "Ordinary Income", amount: 30000, color: "green", stack: "stock" },
-      { id: "distribution", label: "Distribution", amount: -20000, color: "red", stack: "stock" },
-      { id: "nondeductible", label: "Non-Deductible Exp.", amount: -3000, color: "amber", stack: "stock" },
-      { id: "loss", label: "Business Loss", amount: -15000, color: "red", stack: "stock" },
+      { id: "net-income", label: "Net Remaining Income", amount: 17000, color: "green", stack: "stock" },
     ],
     showDebtStack: false,
+    benjiPose: "presenting",
+    interactiveButtons: [
+      {
+        label: "\u2212$5K Distribution",
+        amountDelta: -5000,
+        stack: "stock",
+        color: "red",
+        benjiReaction: "There goes some of your basis... the tower gets shorter.",
+      },
+      {
+        label: "\u2212$3K Loss",
+        amountDelta: -3000,
+        stack: "stock",
+        color: "red",
+        benjiReaction: "Losses chip away at the stack. Smaller tower, less room for future deductions.",
+      },
+    ],
   },
+
+  // ── Step 4: Basis Hits Zero ──
   {
     id: 4,
-    title: "Stock Basis Hits Zero",
-    subtitle: "Losses Are Suspended",
+    title: "Hitting Zero",
     narration: [
-      "What happens when your stock basis reaches zero? Losses cannot reduce basis below zero.",
-      "Any losses that exceed your available stock basis are suspended — they don't disappear, but you can't deduct them this year.",
-      "These suspended losses carry forward indefinitely and can be used in future years when basis is restored.",
-      "Watch as the blocks flash red — the stack has bottomed out.",
+      "Here\u2019s the thing you REALLY need to know.",
+      "Your basis can\u2019t go below zero. When losses eat through everything, the tower is gone.",
+      "Those extra losses? They\u2019re suspended \u2014 stuck in limbo until your basis comes back.",
+      "You\u2019ve got $12,000 in suspended losses just waiting. They\u2019ll come back when income rebuilds your tower.",
     ],
-    highlightRule: "IRC §1366(d)(1) — A shareholder's losses are limited to the adjusted basis of stock plus basis of any indebtedness of the corporation to the shareholder.",
-    blocks: [
-      { id: "initial", label: "Initial Investment", amount: 50000, color: "blue", stack: "stock" },
-      { id: "net-income", label: "Net Income", amount: 10000, color: "green", stack: "stock" },
-      { id: "distributions", label: "Distributions", amount: -25000, color: "red", stack: "stock" },
-      { id: "loss-allowed", label: "Loss (Allowed)", amount: -35000, color: "red", stack: "stock" },
-    ],
+    highlightRule:
+      "IRC \u00A71366(d)(1) \u2014 Losses limited to adjusted basis. Excess losses carry forward under \u00A71366(d)(2) indefinitely.",
+    stockTotal: 0,
+    debtTotal: 0,
+    sections: [],
     suspendedLoss: 12000,
     flashZero: true,
     showDebtStack: false,
+    benjiPose: "whispering",
+    interactiveButtons: [
+      {
+        label: "+$10K Income",
+        amountDelta: 10000,
+        stack: "stock",
+        color: "green",
+        benjiReaction: "Income is back! Now those suspended losses can start being used again.",
+      },
+    ],
   },
+
+  // ── Step 5: Introducing Debt Basis ──
   {
     id: 5,
-    title: "Introducing Debt Basis",
-    subtitle: "A Second Stack Appears",
+    title: "A Second Tower Appears",
     narration: [
-      "Debt basis is a separate stack that exists only when the shareholder has personally loaned money to the S-Corporation.",
-      "Important: Only direct loans from the shareholder count. Bank loans guaranteed by the shareholder do NOT create debt basis.",
-      "Debt basis provides additional room to absorb losses beyond your stock basis.",
+      "Plot twist! There\u2019s actually a SECOND tower \u2014 debt basis.",
+      "If you personally loaned money to your S-Corp, that creates a whole separate stack.",
+      "Important: bank loans you guarantee do NOT count. Only direct loans from YOU to the company.",
+      "This second tower gives you extra room to absorb losses.",
     ],
-    highlightRule: "IRC §1366(d)(1)(B) — Debt basis exists only for indebtedness of the S-Corp to the shareholder. Third-party loans, even if guaranteed, do not count.",
-    blocks: [
+    highlightRule:
+      "IRC \u00A71366(d)(1)(B) \u2014 Debt basis exists only for direct indebtedness of the S-Corp to the shareholder. Guarantees don\u2019t count.",
+    stockTotal: 25000,
+    debtTotal: 30000,
+    sections: [
       { id: "stock-remaining", label: "Stock Basis", amount: 25000, color: "blue", stack: "stock" },
       { id: "shareholder-loan", label: "Shareholder Loan", amount: 30000, color: "purple", stack: "debt" },
     ],
     showDebtStack: true,
+    benjiPose: "presenting",
+    interactiveButtons: [
+      {
+        label: "+$10K Loan to Corp",
+        amountDelta: 10000,
+        stack: "debt",
+        color: "green",
+        benjiReaction: "More debt basis! That\u2019s extra cushion for absorbing losses.",
+      },
+    ],
   },
+
+  // ── Step 6: Debt Basis Restored First ──
   {
     id: 6,
-    title: "Debt Basis Restored First",
-    subtitle: "Income Restores Debt Before Stock",
+    title: "Debt Gets Paid Back First",
     narration: [
-      "When income flows through after both stock and debt basis have been reduced, the restoration order matters.",
-      "Net income first restores debt basis (repaying the shareholder loan) before adding to stock basis.",
-      "This ensures the shareholder can be repaid their loan before accumulating additional stock basis.",
+      "When income flows through after both towers were reduced, there\u2019s a specific restore order.",
+      "Income restores debt basis FIRST \u2014 that\u2019s your loan getting repaid.",
+      "Only after debt basis is fully restored does the rest flow to stock basis.",
+      "Think of it like: the company pays you back before it builds up your ownership value.",
     ],
-    highlightRule: "IRC §1367(b)(2)(B) — If debt basis was previously reduced, income restores it before increasing stock basis.",
-    blocks: [
-      { id: "stock-base", label: "Stock Basis", amount: 5000, color: "blue", stack: "stock" },
-      { id: "debt-reduced", label: "Loan (Reduced)", amount: 10000, color: "purple", stack: "debt" },
+    highlightRule:
+      "IRC \u00A71367(b)(2)(B) \u2014 If debt basis was previously reduced, income restores it before increasing stock basis.",
+    stockTotal: 10000,
+    debtTotal: 25000,
+    sections: [
+      { id: "stock-base", label: "Stock Basis", amount: 10000, color: "blue", stack: "stock" },
+      { id: "debt-remaining", label: "Loan (Reduced)", amount: 10000, color: "purple", stack: "debt" },
       { id: "debt-restored", label: "Restored by Income", amount: 15000, color: "green", stack: "debt" },
-      { id: "stock-increase", label: "Remaining to Stock", amount: 5000, color: "green", stack: "stock" },
     ],
     showDebtStack: true,
+    benjiPose: "presenting",
+    interactiveButtons: [
+      {
+        label: "+$5K Income",
+        amountDelta: 5000,
+        stack: "debt",
+        color: "green",
+        benjiReaction: "That income restores debt basis first \u2014 getting your loan repaid.",
+      },
+    ],
   },
+
+  // ── Step 7: The Limitation Rule ──
   {
     id: 7,
-    title: "The Limitation Rule",
-    subtitle: "Combined Basis Caps Your Deductions",
+    title: "The Combined Limit",
     narration: [
-      "The loss limitation rule is straightforward: you can only deduct losses up to the total of your stock basis plus debt basis.",
-      "Losses first reduce stock basis. Once stock basis is zero, losses reduce debt basis.",
-      "Any losses exceeding the combined total are suspended and carried forward.",
-      "This is why tracking both stacks is critical for S-Corp shareholders.",
+      "The big rule: your total deductible losses are capped at stock basis PLUS debt basis combined.",
+      "Losses eat through stock first. When stock hits zero, they start eating into debt basis.",
+      "Anything left over? Suspended. You\u2019ve got $8,000 in suspended losses here.",
+      "This is why tracking BOTH towers is critical.",
     ],
-    highlightRule: "IRC §1366(d)(1) — Total deductible losses limited to stock basis + debt basis. Excess losses carry forward under §1366(d)(2).",
-    blocks: [
-      { id: "stock-basis", label: "Stock Basis", amount: 20000, color: "blue", stack: "stock" },
-      { id: "debt-basis", label: "Debt Basis", amount: 15000, color: "purple", stack: "debt" },
-      { id: "stock-loss", label: "Loss vs Stock", amount: -20000, color: "red", stack: "stock" },
-      { id: "debt-loss", label: "Loss vs Debt", amount: -10000, color: "red", stack: "debt" },
+    highlightRule:
+      "IRC \u00A71366(d)(1) \u2014 Total deductible losses limited to stock basis + debt basis. Excess carries forward under \u00A71366(d)(2).",
+    stockTotal: 0,
+    debtTotal: 5000,
+    sections: [
+      { id: "debt-remaining", label: "Debt Basis (Remaining)", amount: 5000, color: "purple", stack: "debt" },
     ],
     suspendedLoss: 8000,
     showDebtStack: true,
+    benjiPose: "presenting",
+    interactiveButtons: [
+      {
+        label: "+$15K Income",
+        amountDelta: 15000,
+        stack: "stock",
+        color: "green",
+        benjiReaction: "Income rebuilds the towers! Now those suspended losses can be used.",
+      },
+      {
+        label: "\u2212$5K More Loss",
+        amountDelta: -5000,
+        stack: "debt",
+        color: "red",
+        benjiReaction: "That eats into debt basis too. Both towers are shrinking!",
+      },
+    ],
   },
+
+  // ── Step 8: Distribution Over Basis = Capital Gain ──
   {
     id: 8,
-    title: "Excess Distributions",
-    subtitle: "Capital Gain Triggered",
+    title: "The Capital Gain Trap",
     narration: [
-      "When distributions exceed your stock basis, the excess is not tax-free — it triggers capital gain.",
-      "First, distributions reduce stock basis to zero (tax-free return of investment).",
-      "The excess over stock basis is taxed as capital gain — typically at the favorable long-term rate if the stock has been held over one year.",
-      "This is a common trap for S-Corp shareholders who take large distributions without tracking basis.",
+      "This is the trap that catches a LOT of S-Corp owners.",
+      "You had $30,000 in basis. You took out $30,000 \u2014 tax-free, because that was your basis. The pile is empty.",
+      "But then you took out another $15,000. See the problem? The pile is GONE. That money doesn\u2019t belong to you anymore.",
+      "That extra $15K isn\u2019t a tax-free return of investment. It\u2019s capital gain \u2014 and you owe tax on it.",
+      "Track your basis. Seriously. This is how people get surprise tax bills.",
     ],
-    highlightRule: "IRC §1368(b) & (c) — Distributions in excess of stock basis are treated as gain from the sale or exchange of property (capital gain).",
-    blocks: [
-      { id: "stock-basis", label: "Stock Basis", amount: 30000, color: "blue", stack: "stock" },
-      { id: "dist-basis", label: "Distribution (Tax-Free)", amount: -30000, color: "amber", stack: "stock" },
+    highlightRule:
+      "IRC \u00A71368(b) & (c) \u2014 Distributions exceeding stock basis are treated as gain from sale of property (capital gain). You can\u2019t take out more than you put in tax-free.",
+    stockTotal: 0,
+    debtTotal: 0,
+    sections: [
+      { id: "stock-basis", label: "Stock Basis (Was $30K)", amount: 0, color: "blue", stack: "stock" },
     ],
     capitalGain: 15000,
+    flashZero: true,
     showDebtStack: false,
+    benjiPose: "serious",
+    belowGroundBlock: { label: "Excess Distribution", amount: 15000 },
+    interactiveButtons: [
+      {
+        label: "\u2212$10K Distribution",
+        amountDelta: -10000,
+        stack: "stock",
+        color: "red",
+        benjiReaction: "Careful! With zero basis, EVERY dollar you take out is capital gain!",
+      },
+    ],
   },
 ];
