@@ -21,7 +21,7 @@ export default function Home() {
   const { displayedLines, isComplete, skip, currentLineIdx } = useTypewriter(
     step.narration,
     animationKey,
-    { speed: 20, lineDelay: 400 }
+    { speed: 32, lineDelay: 1000 }
   );
 
   // Compute which phase is active based on current narration line

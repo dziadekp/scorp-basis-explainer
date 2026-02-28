@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useLayoutEffect } from "react";
+import { useEffect, useRef, useState, useLayoutEffect, useCallback } from "react";
 import gsap from "gsap";
 import type { TowerPhase, DepartingBlock } from "@/types";
 import { computeSectionHeight, filterSections, formatDollars } from "@/lib/tower-math";
@@ -35,14 +35,21 @@ export default function ProportionalTower({
 
   const prevAnimKeyRef = useRef(-1);
   const prevPhaseRef = useRef(-1);
-  const latestPhaseRef = useRef(phase);
-  latestPhaseRef.current = phase;
-
   // displayedPhase controls what's rendered in the tower.
   // During departing animations, it stays at the OLD phase so old sections remain visible.
   // After departure completes, it updates to the new phase.
   const [displayedPhase, setDisplayedPhase] = useState<TowerPhase>(phase);
   const [activeDeparting, setActiveDeparting] = useState<DepartingBlock[]>([]);
+
+  // ── Phase queue: prevents race conditions when departing overlaps ──
+  // If a new phase arrives while departing is active, we queue it and
+  // process after the current departing finishes.
+  const departingActiveRef = useRef(false);
+  const phaseQueueRef = useRef<{ phase: TowerPhase; index: number } | null>(null);
+  // Stores the target phase for the CURRENT departing animation.
+  // Without this, the phase prop could advance to a FUTURE phase while
+  // the current departing is still playing, causing skipped intermediate states.
+  const departingTargetRef = useRef<TowerPhase | null>(null);
 
   const stockSections = filterSections(displayedPhase.sections, "stock");
   const debtSections = filterSections(displayedPhase.sections, "debt");
@@ -50,11 +57,30 @@ export default function ProportionalTower({
   const showStock = displayedPhase.stockTotal > 0 || displayedPhase.flashZero;
   const showDebt = displayedPhase.showDebtStack;
 
+  // ── Process a phase transition (called directly or from queue) ──
+  const processPhaseTransition = useCallback((targetPhase: TowerPhase, targetIndex: number) => {
+    prevPhaseRef.current = targetIndex;
+    const departing = targetPhase.departing || [];
+
+    if (departing.length > 0) {
+      departingActiveRef.current = true;
+      departingTargetRef.current = targetPhase; // Store THIS departing's target
+      setActiveDeparting(departing);
+      // displayedPhase stays at old value — old sections remain visible
+    } else {
+      // No departing blocks — update sections directly
+      setDisplayedPhase(targetPhase);
+    }
+  }, []);
+
   // ─── Step entrance animation (new step) ───
   useEffect(() => {
     if (animationKey === prevAnimKeyRef.current) return;
     prevAnimKeyRef.current = animationKey;
     prevPhaseRef.current = 0;
+    departingActiveRef.current = false;
+    phaseQueueRef.current = null;
+    departingTargetRef.current = null;
     setActiveDeparting([]);
     setDisplayedPhase(phase);
   }, [animationKey, phase]);
@@ -72,7 +98,7 @@ export default function ProportionalTower({
       tl.fromTo(
         stockEls,
         { height: 0, opacity: 0 },
-        { height: "auto", opacity: 1, duration: 0.5, stagger: 0.15 },
+        { height: "auto", opacity: 1, duration: 0.6, stagger: 0.2 },
         0
       );
     }
@@ -84,7 +110,7 @@ export default function ProportionalTower({
         tl.fromTo(
           zeroLabel,
           { opacity: 0, scale: 0.8 },
-          { opacity: 1, scale: 1, duration: 0.4 }
+          { opacity: 1, scale: 1, duration: 0.5 }
         );
         tl.to(zeroLabel, {
           textShadow: "0 0 20px rgba(239,68,68,0.8)",
@@ -102,15 +128,15 @@ export default function ProportionalTower({
         tl.fromTo(
           debtContainerRef.current,
           { x: 80, opacity: 0, scale: 0.9 },
-          { x: 0, opacity: 1, scale: 1, duration: 0.6, ease: "back.out(1.4)" },
+          { x: 0, opacity: 1, scale: 1, duration: 0.7, ease: "back.out(1.4)" },
           0.3
         );
         debtEls.forEach((el, i) => {
           tl.fromTo(
             el,
             { height: 0, opacity: 0 },
-            { height: "auto", opacity: 1, duration: 0.4 },
-            0.5 + i * 0.15
+            { height: "auto", opacity: 1, duration: 0.5 },
+            0.5 + i * 0.2
           );
         });
       }
@@ -121,7 +147,7 @@ export default function ProportionalTower({
       tl.fromTo(
         suspendedRef.current,
         { opacity: 0, scale: 0.5 },
-        { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" },
+        { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(2)" },
         "-=0.1"
       );
     }
@@ -131,7 +157,7 @@ export default function ProportionalTower({
       tl.fromTo(
         belowRef.current,
         { y: -20, opacity: 0, scale: 0.9 },
-        { y: 0, opacity: 1, scale: 1, duration: 0.5 },
+        { y: 0, opacity: 1, scale: 1, duration: 0.6 },
         "-=0.2"
       );
     }
@@ -141,7 +167,7 @@ export default function ProportionalTower({
       tl.fromTo(
         capitalGainRef.current,
         { opacity: 0, scale: 0.5 },
-        { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" },
+        { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(2)" },
         "-=0.1"
       );
     }
@@ -156,20 +182,16 @@ export default function ProportionalTower({
     if (animationKey !== prevAnimKeyRef.current) return;
     // Skip if same phase
     if (phaseIndex === prevPhaseRef.current) return;
-    prevPhaseRef.current = phaseIndex;
 
-    const departing = phase.departing || [];
-
-    if (departing.length > 0) {
-      // Has departing blocks — show them FIRST, keep old sections visible
-      setActiveDeparting(departing);
-      // displayedPhase stays at old value — old sections remain visible
-      // The departing animation effect (below) will update displayedPhase when done
-    } else {
-      // No departing blocks — update sections immediately and animate
-      setDisplayedPhase(phase);
+    // If departing is currently active, QUEUE this phase — don't interrupt
+    if (departingActiveRef.current) {
+      phaseQueueRef.current = { phase, index: phaseIndex };
+      return;
     }
-  }, [phaseIndex, phase, animationKey]);
+
+    // No active departing — process immediately
+    processPhaseTransition(phase, phaseIndex);
+  }, [phaseIndex, phase, animationKey, processPhaseTransition]);
 
   // ─── Departing blocks animation ───
   useEffect(() => {
@@ -178,35 +200,53 @@ export default function ProportionalTower({
     const blocks = departingRef.current.querySelectorAll(".departing-item");
     if (!blocks.length) return;
 
+    // Capture the target for THIS departing animation at creation time
+    const myTarget = departingTargetRef.current;
+
     const tl = gsap.timeline({
       onComplete: () => {
+        departingActiveRef.current = false;
+        departingTargetRef.current = null;
         setActiveDeparting([]);
-        // NOW update to the new phase (sections will change)
-        setDisplayedPhase(latestPhaseRef.current);
+
+        // Update to THIS departing's target (not the latest prop, which may be a future phase)
+        if (myTarget) {
+          setDisplayedPhase(myTarget);
+        }
+
+        // Check if there's a queued phase waiting
+        const queued = phaseQueueRef.current;
+        if (queued) {
+          phaseQueueRef.current = null;
+          // Delay so the intermediate sections render before next departing starts
+          setTimeout(() => {
+            processPhaseTransition(queued.phase, queued.index);
+          }, 800);
+        }
       },
     });
 
-    // 1. Appear
+    // 1. Appear — slide in from left
     tl.fromTo(
       blocks,
       { opacity: 0, x: -30, scale: 0.9 },
-      { opacity: 1, x: 0, scale: 1, duration: 0.35, stagger: 0.1, ease: "back.out(1.2)" }
+      { opacity: 1, x: 0, scale: 1, duration: 0.4, stagger: 0.12, ease: "back.out(1.2)" }
     );
 
-    // 2. Pause so user can read
-    tl.to({}, { duration: 0.7 });
+    // 2. Pause so user can read the departing label
+    tl.to({}, { duration: 1.5 });
 
     // 3. Slide away to the right
     tl.to(blocks, {
       x: 120,
       opacity: 0,
-      duration: 0.5,
+      duration: 0.6,
       ease: "power2.in",
-      stagger: 0.05,
+      stagger: 0.08,
     });
 
     return () => { tl.kill(); };
-  }, [activeDeparting]);
+  }, [activeDeparting, processPhaseTransition]);
 
   // ─── Animate new sections after displayedPhase updates (phase transition) ───
   // We use a ref to track if this is a phase transition vs step entrance
@@ -236,7 +276,7 @@ export default function ProportionalTower({
       tl.fromTo(
         stockEls,
         { scaleY: 0, opacity: 0, transformOrigin: "bottom" },
-        { scaleY: 1, opacity: 1, duration: 0.4, stagger: 0.1 },
+        { scaleY: 1, opacity: 1, duration: 0.5, stagger: 0.12 },
         0
       );
     }
@@ -248,7 +288,7 @@ export default function ProportionalTower({
         tl.fromTo(
           zeroLabel,
           { opacity: 0, scale: 0.8 },
-          { opacity: 1, scale: 1, duration: 0.4 }
+          { opacity: 1, scale: 1, duration: 0.5 }
         );
         tl.to(zeroLabel, {
           textShadow: "0 0 20px rgba(239,68,68,0.8)",
@@ -268,7 +308,7 @@ export default function ProportionalTower({
         tl.fromTo(
           debtContainerRef.current,
           { opacity: 0, x: 30 },
-          { opacity: 1, x: 0, duration: 0.4 },
+          { opacity: 1, x: 0, duration: 0.5 },
           0
         );
       }
@@ -277,7 +317,7 @@ export default function ProportionalTower({
         tl.fromTo(
           debtEls,
           { scaleY: 0, opacity: 0, transformOrigin: "bottom" },
-          { scaleY: 1, opacity: 1, duration: 0.4, stagger: 0.1 },
+          { scaleY: 1, opacity: 1, duration: 0.5, stagger: 0.12 },
           0.1
         );
       }
@@ -288,7 +328,7 @@ export default function ProportionalTower({
       tl.fromTo(
         suspendedRef.current,
         { opacity: 0, scale: 0.5 },
-        { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" },
+        { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(2)" },
         "-=0.1"
       );
     }
@@ -298,7 +338,7 @@ export default function ProportionalTower({
       tl.fromTo(
         belowRef.current,
         { y: -20, opacity: 0, scale: 0.9 },
-        { y: 0, opacity: 1, scale: 1, duration: 0.5 },
+        { y: 0, opacity: 1, scale: 1, duration: 0.6 },
         "-=0.2"
       );
     }
@@ -308,7 +348,7 @@ export default function ProportionalTower({
       tl.fromTo(
         capitalGainRef.current,
         { opacity: 0, scale: 0.5 },
-        { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" },
+        { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(2)" },
         "-=0.1"
       );
     }

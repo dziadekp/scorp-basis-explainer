@@ -19,6 +19,10 @@ export function useTypewriter(
   const [isComplete, setIsComplete] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Track the previous trigger to detect changes DURING render
+  // (React's official pattern for "adjusting state based on props")
+  const [prevTrigger, setPrevTrigger] = useState(trigger);
+
   const clearTimer = useCallback(() => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
@@ -26,14 +30,18 @@ export function useTypewriter(
     }
   }, []);
 
-  // Reset when trigger changes
-  useEffect(() => {
+  // ── SYNCHRONOUS RESET during render ──
+  // When trigger changes, we must reset currentLineIdx to 0 BEFORE
+  // the parent's useMemo computes activePhaseIdx. Using useEffect
+  // would be too late (it runs after render).
+  if (trigger !== prevTrigger) {
     clearTimer();
     setDisplayedLines([]);
     setCurrentLineIdx(0);
     setCurrentCharIdx(0);
     setIsComplete(false);
-  }, [trigger, clearTimer]);
+    setPrevTrigger(trigger);
+  }
 
   // Typewriter effect
   useEffect(() => {
