@@ -16,6 +16,7 @@ import type { StepConfig } from "@/types";
  *   Step 6: Stock $13K   | Debt $30K  | Susp $0
  *   Step 7: Stock $0     | Debt $0    | Susp $8K
  *   Step 8: Stock $0     | Debt $30K  | Susp $0   + $15K LTCG
+ *   Step 9: Loan Repayment Trap — ordinary income when debt basis < face value
  */
 
 export const MAX_BASIS_REFERENCE = 87000;
@@ -500,6 +501,86 @@ export const STEPS: StepConfig[] = [
         showDebtStack: true,
         flashZero: true,
         belowGroundBlock: { label: "Excess Distribution \u2192 Capital Gain", amount: 15000 },
+      },
+    ],
+  },
+
+  // ═══════════════════════════════════════
+  // STEP 9 — The Loan Repayment Trap
+  // Start: Stock $0, Debt $30K (restored in Step 8)
+  // Scenario: S-Corp repays $30K loan but business had losses
+  // Debt basis reduced to $0 → repayment = ordinary income
+  // ═══════════════════════════════════════
+  {
+    id: 9,
+    title: "The Loan Repayment Trap",
+    narration: [
+      "Remember that $30,000 loan your company still owes you? Eventually, the company will pay it back. But here\u2019s what most owners don\u2019t realize: the tax hit depends entirely on your debt basis at that moment.",
+      "Let\u2019s say it\u2019s a new year. Your debt basis is $30,000 \u2014 fully restored from last step. But the business has another rough year and loses $30,000.",
+      "Those losses eat through your debt basis. $30,000 gone. Debt basis is back to zero.",
+      "Now the company writes you a check for $30,000 to repay the loan. You\u2019d think: great, I\u2019m just getting my own money back. But look at the basis.",
+      "Your debt basis is zero. The IRS says: you received $30,000, your basis is $0, so you recognize $30,000 of ordinary income. Not capital gain \u2014 ordinary income, taxed at your full rate.",
+      "Why ordinary and not capital gain? Because your debt basis was reduced by ordinary business losses. The IRS treats the repayment as a recapture of those deductions. You got ordinary deductions going in, so you get ordinary income coming out.",
+      "Now compare: what if the business had a PROFITABLE year instead? Say $30,000 of income came in before the repayment.",
+      "That income restores your debt basis back to $30,000 FIRST. Then when the company repays the $30,000 loan, your basis matches the repayment. No gain. No tax.",
+      "The timing matters. Under the tax code, all income and losses for the year are calculated at year-end, before the repayment is evaluated. So even if the company pays you back in January and earns the income in December, the income restores your basis first.",
+      "This is the final lesson. Two identical loan repayments \u2014 same $30,000 \u2014 completely different outcomes. One year with losses? You owe tax on every dollar. One year with income? Tax-free. Your accountant needs to be tracking this.",
+      "Track your basis. Know your debt basis before taking any loan repayments. And always \u2014 always \u2014 talk to your accountant before making these decisions. That\u2019s what they\u2019re there for.",
+    ],
+    highlightRule:
+      "IRC \u00A71367(b)(2)(A) \u2014 Loan repayment exceeding debt basis = ordinary income (Rev. Rul. 64-162). Year-end netting under Treas. Reg. \u00A71.1367-2(a) allows same-year income to restore basis before repayment is evaluated.",
+    benjiPose: "serious",
+    phases: [
+      // Line 0: Start with Step 8 ending state (Stock $0, Debt $30K restored)
+      {
+        atLine: 0,
+        sections: [
+          { id: "debt", label: "Debt Basis (Restored)", amount: 30000, color: "purple", stack: "debt" },
+        ],
+        stockTotal: 0,
+        debtTotal: 30000,
+        showDebtStack: true,
+        flashZero: true,
+      },
+      // Line 2: Losses eat debt basis → $0
+      {
+        atLine: 2,
+        departing: [{ label: "Business Loss", amount: 30000 }],
+        sections: [],
+        stockTotal: 0,
+        debtTotal: 0,
+        showDebtStack: true,
+        flashZero: true,
+      },
+      // Line 4: Loan repayment with zero basis = ordinary income
+      {
+        atLine: 4,
+        sections: [],
+        stockTotal: 0,
+        debtTotal: 0,
+        ordinaryIncome: 30000,
+        showDebtStack: true,
+        flashZero: true,
+        belowGroundBlock: { label: "Loan Repayment \u2192 Ordinary Income", amount: 30000 },
+      },
+      // Line 7: The safe scenario — income restores basis first
+      {
+        atLine: 7,
+        sections: [
+          { id: "debt-safe", label: "Debt Basis (Restored)", amount: 30000, color: "purple", stack: "debt" },
+        ],
+        stockTotal: 0,
+        debtTotal: 30000,
+        showDebtStack: true,
+        flashZero: true,
+      },
+      // Line 8: Year-end netting — repayment with full basis = no tax
+      {
+        atLine: 8,
+        sections: [],
+        stockTotal: 0,
+        debtTotal: 0,
+        showDebtStack: true,
       },
     ],
   },

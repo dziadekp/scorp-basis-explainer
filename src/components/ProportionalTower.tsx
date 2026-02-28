@@ -31,6 +31,7 @@ export default function ProportionalTower({
   const belowRef = useRef<HTMLDivElement>(null);
   const suspendedRef = useRef<HTMLDivElement>(null);
   const capitalGainRef = useRef<HTMLDivElement>(null);
+  const ordinaryIncomeRef = useRef<HTMLDivElement>(null);
   const departingRef = useRef<HTMLDivElement>(null);
 
   const prevAnimKeyRef = useRef(-1);
@@ -166,6 +167,16 @@ export default function ProportionalTower({
     if (capitalGainRef.current && displayedPhase.capitalGain) {
       tl.fromTo(
         capitalGainRef.current,
+        { opacity: 0, scale: 0.5 },
+        { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(2)" },
+        "-=0.1"
+      );
+    }
+
+    // Ordinary income badge
+    if (ordinaryIncomeRef.current && displayedPhase.ordinaryIncome) {
+      tl.fromTo(
+        ordinaryIncomeRef.current,
         { opacity: 0, scale: 0.5 },
         { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(2)" },
         "-=0.1"
@@ -353,6 +364,16 @@ export default function ProportionalTower({
       );
     }
 
+    // Ordinary income badge
+    if (ordinaryIncomeRef.current && displayedPhase.ordinaryIncome) {
+      tl.fromTo(
+        ordinaryIncomeRef.current,
+        { opacity: 0, scale: 0.5 },
+        { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(2)" },
+        "-=0.1"
+      );
+    }
+
     return () => { tl.kill(); };
   }, [displayedPhase, animationKey]);
 
@@ -524,6 +545,23 @@ export default function ProportionalTower({
               <div className="text-[10px] text-amber-300 font-semibold uppercase">Capital Gain</div>
               <div className="text-sm font-bold text-amber-400 tabular-nums">
                 {formatDollars(displayedPhase.capitalGain)}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {displayedPhase.ordinaryIncome !== undefined && displayedPhase.ordinaryIncome > 0 && (
+          <div
+            ref={ordinaryIncomeRef}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-rose-900/30 border border-rose-500/40"
+          >
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="text-rose-400 shrink-0">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <div>
+              <div className="text-[10px] text-rose-300 font-semibold uppercase">Ordinary Income</div>
+              <div className="text-sm font-bold text-rose-400 tabular-nums">
+                {formatDollars(displayedPhase.ordinaryIncome)}
               </div>
             </div>
           </div>

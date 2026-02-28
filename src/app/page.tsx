@@ -98,7 +98,7 @@ export default function Home() {
             A visual guide to understanding stock basis and debt basis
           </p>
           <p className="text-sm text-slate-500 mb-8">
-            Follow one company through 8 real scenarios. Benji will walk you through every step.
+            Follow one company through 9 real scenarios. Benji will walk you through every step.
           </p>
           <button
             onClick={handleStart}

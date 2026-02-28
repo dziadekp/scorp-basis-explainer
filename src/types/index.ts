@@ -21,6 +21,7 @@ export interface TowerPhase {
   debtTotal: number;
   suspendedLoss?: number;
   capitalGain?: number;
+  ordinaryIncome?: number;
   showDebtStack?: boolean;
   flashZero?: boolean;
   belowGroundBlock?: { label: string; amount: number };
