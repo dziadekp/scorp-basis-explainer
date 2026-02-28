@@ -2,7 +2,8 @@ import type { StepConfig } from "@/types";
 
 /*
  * ONE continuous story of ONE company.
- * Every step's ending numbers = next step's starting numbers.
+ * Every step starts by showing the previous step's ending tower.
+ * As Benji talks, the tower progressively changes (blocks appear/disappear).
  *
  * Verified against IRC §1366, §1367, §1368 by CPA audit.
  *
@@ -22,6 +23,7 @@ export const MAX_BASIS_REFERENCE = 87000;
 export const STEPS: StepConfig[] = [
   // ═══════════════════════════════════════
   // STEP 1 — Initial Investment
+  // End: Stock $50K
   // ═══════════════════════════════════════
   {
     id: 1,
@@ -34,18 +36,22 @@ export const STEPS: StepConfig[] = [
     ],
     highlightRule:
       "IRC \u00A7358(a) \u2014 Basis in stock equals the money you contributed.",
-    stockTotal: 50000,
-    debtTotal: 0,
-    sections: [
-      { id: "initial", label: "Initial Investment", amount: 50000, color: "blue", stack: "stock" },
-    ],
-    showDebtStack: false,
     benjiPose: "waving",
+    phases: [
+      {
+        atLine: 0,
+        sections: [
+          { id: "initial", label: "Initial Investment", amount: 50000, color: "blue", stack: "stock" },
+        ],
+        stockTotal: 50000,
+        debtTotal: 0,
+      },
+    ],
   },
 
   // ═══════════════════════════════════════
   // STEP 2 — Income Increases Basis
-  // Starting: Stock $50K
+  // Start: Stock $50K → End: Stock $87K
   // ═══════════════════════════════════════
   {
     id: 2,
@@ -59,21 +65,56 @@ export const STEPS: StepConfig[] = [
     ],
     highlightRule:
       "IRC \u00A71367(a)(1) \u2014 All income items increase basis: ordinary income, separately stated income, and tax-exempt income.",
-    stockTotal: 87000,
-    debtTotal: 0,
-    sections: [
-      { id: "initial", label: "Initial Investment", amount: 50000, color: "blue", stack: "stock" },
-      { id: "ordinary", label: "Ordinary Income +$30K", amount: 30000, color: "green", stack: "stock" },
-      { id: "interest", label: "Interest Income +$5K", amount: 5000, color: "green", stack: "stock" },
-      { id: "tax-exempt", label: "Tax-Exempt Income +$2K", amount: 2000, color: "green", stack: "stock" },
-    ],
-    showDebtStack: false,
     benjiPose: "presenting",
+    phases: [
+      // Line 0: Start with Step 1's ending tower ($50K)
+      {
+        atLine: 0,
+        sections: [
+          { id: "initial", label: "Initial Investment", amount: 50000, color: "blue", stack: "stock" },
+        ],
+        stockTotal: 50000,
+        debtTotal: 0,
+      },
+      // Line 1: +$30K ordinary income → $80K
+      {
+        atLine: 1,
+        sections: [
+          { id: "initial", label: "Initial Investment", amount: 50000, color: "blue", stack: "stock" },
+          { id: "ordinary", label: "Ordinary Income +$30K", amount: 30000, color: "green", stack: "stock" },
+        ],
+        stockTotal: 80000,
+        debtTotal: 0,
+      },
+      // Line 2: +$5K interest → $85K
+      {
+        atLine: 2,
+        sections: [
+          { id: "initial", label: "Initial Investment", amount: 50000, color: "blue", stack: "stock" },
+          { id: "ordinary", label: "Ordinary Income +$30K", amount: 30000, color: "green", stack: "stock" },
+          { id: "interest", label: "Interest Income +$5K", amount: 5000, color: "green", stack: "stock" },
+        ],
+        stockTotal: 85000,
+        debtTotal: 0,
+      },
+      // Line 3: +$2K tax-exempt → $87K
+      {
+        atLine: 3,
+        sections: [
+          { id: "initial", label: "Initial Investment", amount: 50000, color: "blue", stack: "stock" },
+          { id: "ordinary", label: "Ordinary Income +$30K", amount: 30000, color: "green", stack: "stock" },
+          { id: "interest", label: "Interest Income +$5K", amount: 5000, color: "green", stack: "stock" },
+          { id: "tax-exempt", label: "Tax-Exempt Income +$2K", amount: 2000, color: "green", stack: "stock" },
+        ],
+        stockTotal: 87000,
+        debtTotal: 0,
+      },
+    ],
   },
 
   // ═══════════════════════════════════════
   // STEP 3 — Basis Decreases
-  // Starting: Stock $87K (from Step 2)
+  // Start: Stock $87K → End: Stock $49K
   // ═══════════════════════════════════════
   {
     id: 3,
@@ -87,18 +128,58 @@ export const STEPS: StepConfig[] = [
     ],
     highlightRule:
       "IRC \u00A71367(a)(2) \u2014 Decreases follow a mandatory order: distributions first, non-deductible expenses second, losses last.",
-    stockTotal: 49000,
-    debtTotal: 0,
-    sections: [
-      { id: "remaining-base", label: "Remaining Basis", amount: 49000, color: "blue", stack: "stock" },
-    ],
-    showDebtStack: false,
     benjiPose: "presenting",
+    phases: [
+      // Line 0: Start with Step 2's ending tower ($87K, 4 sections)
+      {
+        atLine: 0,
+        sections: [
+          { id: "initial", label: "Initial Investment", amount: 50000, color: "blue", stack: "stock" },
+          { id: "ordinary", label: "Ordinary Income", amount: 30000, color: "green", stack: "stock" },
+          { id: "interest", label: "Interest Income", amount: 5000, color: "green", stack: "stock" },
+          { id: "tax-exempt", label: "Tax-Exempt Income", amount: 2000, color: "green", stack: "stock" },
+        ],
+        stockTotal: 87000,
+        debtTotal: 0,
+      },
+      // Line 1: Distribution -$20K → $67K
+      {
+        atLine: 1,
+        departing: [{ label: "Distribution", amount: 20000 }],
+        sections: [
+          { id: "initial", label: "Initial Investment", amount: 50000, color: "blue", stack: "stock" },
+          { id: "remaining", label: "Remaining Income", amount: 17000, color: "green", stack: "stock" },
+        ],
+        stockTotal: 67000,
+        debtTotal: 0,
+      },
+      // Line 2: Non-deductible -$3K → $64K
+      {
+        atLine: 2,
+        departing: [{ label: "Non-Deductible Expenses", amount: 3000 }],
+        sections: [
+          { id: "initial", label: "Initial Investment", amount: 50000, color: "blue", stack: "stock" },
+          { id: "remaining", label: "Remaining Income", amount: 14000, color: "green", stack: "stock" },
+        ],
+        stockTotal: 64000,
+        debtTotal: 0,
+      },
+      // Line 3: Loss -$15K → $49K
+      {
+        atLine: 3,
+        departing: [{ label: "Business Loss", amount: 15000 }],
+        sections: [
+          { id: "remaining-basis", label: "Remaining Basis", amount: 49000, color: "blue", stack: "stock" },
+        ],
+        stockTotal: 49000,
+        debtTotal: 0,
+      },
+    ],
   },
 
   // ═══════════════════════════════════════
   // STEP 4 — Basis Hits Zero
-  // Starting: Stock $49K (from Step 3)
+  // Start: Stock $49K → End: Stock $0 + Suspended $12K
   // ═══════════════════════════════════════
   {
     id: 4,
@@ -113,18 +194,53 @@ export const STEPS: StepConfig[] = [
     ],
     highlightRule:
       "IRC \u00A71366(d)(1) \u2014 Losses can\u2019t reduce basis below zero. Excess losses carry forward indefinitely under \u00A71366(d)(2).",
-    stockTotal: 0,
-    debtTotal: 0,
-    sections: [],
-    suspendedLoss: 12000,
-    flashZero: true,
-    showDebtStack: false,
     benjiPose: "whispering",
+    phases: [
+      // Line 0: Start with Step 3's ending ($49K)
+      {
+        atLine: 0,
+        sections: [
+          { id: "remaining-basis", label: "Remaining Basis", amount: 49000, color: "blue", stack: "stock" },
+        ],
+        stockTotal: 49000,
+        debtTotal: 0,
+      },
+      // Line 1: Distribution -$10K → $39K
+      {
+        atLine: 1,
+        departing: [{ label: "Distribution", amount: 10000 }],
+        sections: [
+          { id: "remaining-basis", label: "Remaining Basis", amount: 39000, color: "blue", stack: "stock" },
+        ],
+        stockTotal: 39000,
+        debtTotal: 0,
+      },
+      // Line 2: Non-deductible -$2K → $37K
+      {
+        atLine: 2,
+        departing: [{ label: "Non-Deductible Expenses", amount: 2000 }],
+        sections: [
+          { id: "remaining-basis", label: "Remaining Basis", amount: 37000, color: "blue", stack: "stock" },
+        ],
+        stockTotal: 37000,
+        debtTotal: 0,
+      },
+      // Line 4: Loss eats remaining → ZERO + $12K suspended
+      {
+        atLine: 4,
+        departing: [{ label: "Loss (Limited to Basis)", amount: 37000 }],
+        sections: [],
+        stockTotal: 0,
+        debtTotal: 0,
+        suspendedLoss: 12000,
+        flashZero: true,
+      },
+    ],
   },
 
   // ═══════════════════════════════════════
-  // STEP 5 — Shareholder Loan + Suspended Loss Used
-  // Starting: Stock $0, Debt $0, Suspended $12K
+  // STEP 5 — Shareholder Loan Creates Debt Basis
+  // Start: Stock $0, Suspended $12K → End: Stock $0, Debt $18K
   // ═══════════════════════════════════════
   {
     id: 5,
@@ -138,18 +254,47 @@ export const STEPS: StepConfig[] = [
     ],
     highlightRule:
       "IRC \u00A71366(d)(1)(B) \u2014 Debt basis from direct shareholder loans absorbs suspended losses. Per Rev. Rul. 75-144, guarantees don\u2019t count.",
-    stockTotal: 0,
-    debtTotal: 18000,
-    sections: [
-      { id: "loan", label: "Shareholder Loan (Net)", amount: 18000, color: "purple", stack: "debt" },
-    ],
-    showDebtStack: true,
     benjiPose: "presenting",
+    phases: [
+      // Line 0: Stock $0 + suspended $12K (Step 4 ending)
+      {
+        atLine: 0,
+        sections: [],
+        stockTotal: 0,
+        debtTotal: 0,
+        suspendedLoss: 12000,
+        flashZero: true,
+      },
+      // Line 1: Loan creates $30K debt basis (second tower appears)
+      {
+        atLine: 1,
+        sections: [
+          { id: "loan", label: "Shareholder Loan", amount: 30000, color: "purple", stack: "debt" },
+        ],
+        stockTotal: 0,
+        debtTotal: 30000,
+        suspendedLoss: 12000,
+        showDebtStack: true,
+        flashZero: true,
+      },
+      // Line 3: Suspended losses used → debt reduced to $18K
+      {
+        atLine: 3,
+        departing: [{ label: "Suspended Loss Used", amount: 12000 }],
+        sections: [
+          { id: "loan-net", label: "Loan (After Losses)", amount: 18000, color: "purple", stack: "debt" },
+        ],
+        stockTotal: 0,
+        debtTotal: 18000,
+        showDebtStack: true,
+        flashZero: true,
+      },
+    ],
   },
 
   // ═══════════════════════════════════════
   // STEP 6 — Income Restores Debt Before Stock
-  // Starting: Stock $0, Debt $18K (face $30K)
+  // Start: Stock $0, Debt $18K → End: Stock $13K, Debt $30K
   // ═══════════════════════════════════════
   {
     id: 6,
@@ -163,19 +308,47 @@ export const STEPS: StepConfig[] = [
     ],
     highlightRule:
       "IRC \u00A71367(b)(2)(B) \u2014 When debt basis was reduced by losses, income restores it before increasing stock basis.",
-    stockTotal: 13000,
-    debtTotal: 30000,
-    sections: [
-      { id: "stock-restored", label: "Stock Basis", amount: 13000, color: "blue", stack: "stock" },
-      { id: "debt-full", label: "Debt Basis (Restored)", amount: 30000, color: "purple", stack: "debt" },
-    ],
-    showDebtStack: true,
     benjiPose: "presenting",
+    phases: [
+      // Line 0: Start with Step 5 ending (Stock $0, Debt $18K)
+      {
+        atLine: 0,
+        sections: [
+          { id: "debt-reduced", label: "Debt Basis (Reduced)", amount: 18000, color: "purple", stack: "debt" },
+        ],
+        stockTotal: 0,
+        debtTotal: 18000,
+        showDebtStack: true,
+        flashZero: true,
+      },
+      // Line 2: Income restores debt to $30K
+      {
+        atLine: 2,
+        sections: [
+          { id: "debt-full", label: "Debt Basis (Restored)", amount: 30000, color: "purple", stack: "debt" },
+        ],
+        stockTotal: 0,
+        debtTotal: 30000,
+        showDebtStack: true,
+        flashZero: true,
+      },
+      // Line 3: Remaining $13K goes to stock
+      {
+        atLine: 3,
+        sections: [
+          { id: "stock-restored", label: "Stock Basis", amount: 13000, color: "blue", stack: "stock" },
+          { id: "debt-full", label: "Debt Basis (Restored)", amount: 30000, color: "purple", stack: "debt" },
+        ],
+        stockTotal: 13000,
+        debtTotal: 30000,
+        showDebtStack: true,
+      },
+    ],
   },
 
   // ═══════════════════════════════════════
   // STEP 7 — The Limitation Rule
-  // Starting: Stock $13K, Debt $30K
+  // Start: Stock $13K, Debt $30K → End: Stock $0, Debt $0, Suspended $8K
   // ═══════════════════════════════════════
   {
     id: 7,
@@ -190,21 +363,61 @@ export const STEPS: StepConfig[] = [
     ],
     highlightRule:
       "IRC \u00A71366(d)(1) \u2014 Total deductible losses limited to stock basis + debt basis combined. Excess carries forward.",
-    stockTotal: 0,
-    debtTotal: 0,
-    sections: [],
-    suspendedLoss: 8000,
-    flashZero: true,
-    showDebtStack: true,
     benjiPose: "whispering",
+    phases: [
+      // Line 0: Start with Step 6 ending (Stock $13K, Debt $30K)
+      {
+        atLine: 0,
+        sections: [
+          { id: "stock", label: "Stock Basis", amount: 13000, color: "blue", stack: "stock" },
+          { id: "debt", label: "Debt Basis", amount: 30000, color: "purple", stack: "debt" },
+        ],
+        stockTotal: 13000,
+        debtTotal: 30000,
+        showDebtStack: true,
+      },
+      // Line 2: Stock eaten → $0
+      {
+        atLine: 2,
+        departing: [{ label: "Loss (Stock Basis)", amount: 13000 }],
+        sections: [
+          { id: "debt", label: "Debt Basis", amount: 30000, color: "purple", stack: "debt" },
+        ],
+        stockTotal: 0,
+        debtTotal: 30000,
+        showDebtStack: true,
+        flashZero: true,
+      },
+      // Line 3: Debt eaten → $0
+      {
+        atLine: 3,
+        departing: [{ label: "Loss (Debt Basis)", amount: 30000 }],
+        sections: [],
+        stockTotal: 0,
+        debtTotal: 0,
+        showDebtStack: true,
+        flashZero: true,
+      },
+      // Line 5: Suspended $8K
+      {
+        atLine: 5,
+        sections: [],
+        stockTotal: 0,
+        debtTotal: 0,
+        suspendedLoss: 8000,
+        showDebtStack: true,
+        flashZero: true,
+      },
+    ],
   },
 
   // ═══════════════════════════════════════
   // STEP 8 — Distribution Over Basis = Capital Gain
-  // Starting: Stock $0, Debt $0, Suspended $8K
+  // Start: Stock $0, Debt $0, Suspended $8K
   // Income $45K → restores debt to $30K, stock to $15K
-  // Suspended $8K used → stock becomes $7K
+  // Suspended $8K used → stock $7K
   // Distribution $22K → $7K tax-free, $15K capital gain
+  // End: Stock $0, Debt $30K + $15K LTCG
   // ═══════════════════════════════════════
   {
     id: 8,
@@ -220,15 +433,67 @@ export const STEPS: StepConfig[] = [
     ],
     highlightRule:
       "IRC \u00A71368(b) \u2014 Distributions exceeding stock basis are capital gain. Here: $22K distribution \u2212 $7K basis = $15K long-term capital gain.",
-    stockTotal: 0,
-    debtTotal: 30000,
-    sections: [
-      { id: "debt-final", label: "Debt Basis (Restored)", amount: 30000, color: "purple", stack: "debt" },
-    ],
-    capitalGain: 15000,
-    flashZero: true,
-    showDebtStack: true,
     benjiPose: "serious",
-    belowGroundBlock: { label: "Excess Distribution \u2192 Capital Gain", amount: 15000 },
+    phases: [
+      // Line 0: Start with Step 7 ending (empty + suspended $8K)
+      {
+        atLine: 0,
+        sections: [],
+        stockTotal: 0,
+        debtTotal: 0,
+        suspendedLoss: 8000,
+        showDebtStack: true,
+        flashZero: true,
+      },
+      // Line 1: Income restores → Stock $15K, Debt $30K (still suspended)
+      {
+        atLine: 1,
+        sections: [
+          { id: "stock", label: "Stock Basis", amount: 15000, color: "blue", stack: "stock" },
+          { id: "debt", label: "Debt Basis (Restored)", amount: 30000, color: "purple", stack: "debt" },
+        ],
+        stockTotal: 15000,
+        debtTotal: 30000,
+        suspendedLoss: 8000,
+        showDebtStack: true,
+      },
+      // Line 2: Suspended loss used → Stock drops to $7K
+      {
+        atLine: 2,
+        departing: [{ label: "Suspended Loss Used", amount: 8000 }],
+        sections: [
+          { id: "stock", label: "Stock Basis", amount: 7000, color: "blue", stack: "stock" },
+          { id: "debt", label: "Debt Basis (Restored)", amount: 30000, color: "purple", stack: "debt" },
+        ],
+        stockTotal: 7000,
+        debtTotal: 30000,
+        showDebtStack: true,
+      },
+      // Line 4: Tax-free distribution eats stock → $0
+      {
+        atLine: 4,
+        departing: [{ label: "Distribution (Tax-Free)", amount: 7000 }],
+        sections: [
+          { id: "debt", label: "Debt Basis (Restored)", amount: 30000, color: "purple", stack: "debt" },
+        ],
+        stockTotal: 0,
+        debtTotal: 30000,
+        showDebtStack: true,
+        flashZero: true,
+      },
+      // Line 5: Capital gain revealed
+      {
+        atLine: 5,
+        sections: [
+          { id: "debt", label: "Debt Basis (Restored)", amount: 30000, color: "purple", stack: "debt" },
+        ],
+        stockTotal: 0,
+        debtTotal: 30000,
+        capitalGain: 15000,
+        showDebtStack: true,
+        flashZero: true,
+        belowGroundBlock: { label: "Excess Distribution \u2192 Capital Gain", amount: 15000 },
+      },
+    ],
   },
 ];

@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { STEPS } from "@/components/steps";
 import ProportionalTower from "@/components/ProportionalTower";
 import BenjiNarrator from "@/components/BenjiNarrator";
 import StepControls from "@/components/StepControls";
 import { useVoice } from "@/hooks/useVoice";
+import { useTypewriter } from "@/hooks/useTypewriter";
 
 export default function Home() {
   const [currentStep, setCurrentStep] = useState(0);
@@ -15,6 +16,24 @@ export default function Home() {
 
   const step = STEPS[currentStep];
   const { speakStep, stop, isSpeaking } = useVoice({ isMuted });
+
+  // Typewriter — lifted here so we can compute the active phase
+  const { displayedLines, isComplete, skip, currentLineIdx } = useTypewriter(
+    step.narration,
+    animationKey,
+    { speed: 20, lineDelay: 400 }
+  );
+
+  // Compute which phase is active based on current narration line
+  const activePhaseIdx = useMemo(() => {
+    let best = 0;
+    for (let i = 0; i < step.phases.length; i++) {
+      if (step.phases[i].atLine <= currentLineIdx) best = i;
+    }
+    return best;
+  }, [step.phases, currentLineIdx]);
+
+  const activePhase = step.phases[activePhaseIdx];
 
   // Persist mute preference
   useEffect(() => {
@@ -139,7 +158,8 @@ export default function Home() {
           {/* Tower Canvas — 3 columns */}
           <div className="lg:col-span-3 flex items-center justify-center rounded-2xl bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 p-4 sm:p-6">
             <ProportionalTower
-              step={step}
+              phase={activePhase}
+              phaseIndex={activePhaseIdx}
               animationKey={animationKey}
             />
           </div>
@@ -158,7 +178,9 @@ export default function Home() {
             <div className="flex-1 overflow-y-auto">
               <BenjiNarrator
                 pose={step.benjiPose}
-                narrationLines={step.narration}
+                displayedLines={displayedLines}
+                isComplete={isComplete}
+                onSkip={skip}
                 animationKey={animationKey}
                 isSpeaking={isSpeaking}
               />

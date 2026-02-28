@@ -5,28 +5,26 @@ import gsap from "gsap";
 import Image from "next/image";
 import type { BenjiPose } from "@/types";
 import { POSE_MAP } from "@/types";
-import { useTypewriter } from "@/hooks/useTypewriter";
 
 interface BenjiNarratorProps {
   pose: BenjiPose;
-  narrationLines: string[];
+  displayedLines: string[];
+  isComplete: boolean;
+  onSkip: () => void;
   animationKey: number;
   isSpeaking: boolean;
 }
 
 export default function BenjiNarrator({
   pose,
-  narrationLines,
+  displayedLines,
+  isComplete,
+  onSkip,
   animationKey,
   isSpeaking,
 }: BenjiNarratorProps) {
   const avatarRef = useRef<HTMLDivElement>(null);
   const bubbleRef = useRef<HTMLDivElement>(null);
-
-  const { displayedLines, isComplete, skip } = useTypewriter(narrationLines, animationKey, {
-    speed: 20,
-    lineDelay: 300,
-  });
 
   // Animate avatar entrance
   useEffect(() => {
@@ -78,7 +76,7 @@ export default function BenjiNarrator({
       </div>
 
       {/* Speech Bubble */}
-      <div ref={bubbleRef} className="speech-bubble w-full" onClick={skip}>
+      <div ref={bubbleRef} className="speech-bubble w-full" onClick={onSkip}>
         <div className="space-y-2 min-h-[80px]">
           {displayedLines.map((line, i) => (
             <p key={i} className="text-sm text-slate-200 leading-relaxed">
@@ -97,7 +95,7 @@ export default function BenjiNarrator({
 
         {!isComplete && (
           <button
-            onClick={skip}
+            onClick={onSkip}
             className="mt-2 text-[10px] text-slate-500 hover:text-slate-400 transition-colors"
           >
             Click to skip

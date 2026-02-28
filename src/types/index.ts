@@ -1,27 +1,40 @@
 export type BenjiPose = "waving" | "presenting" | "whispering" | "serious";
 
-export interface StepConfig {
-  id: number;
-  title: string;
-  narration: string[];
-  highlightRule?: string;
-  stockTotal: number;
-  debtTotal: number;
-  sections: TowerSection[];
-  suspendedLoss?: number;
-  capitalGain?: number;
-  showDebtStack?: boolean;
-  flashZero?: boolean;
-  benjiPose: BenjiPose;
-  belowGroundBlock?: { label: string; amount: number };
-}
-
 export interface TowerSection {
   id: string;
   label: string;
   amount: number;
   color: string;
   stack: "stock" | "debt";
+}
+
+export interface DepartingBlock {
+  label: string;
+  amount: number;
+}
+
+export interface TowerPhase {
+  /** Which narration line index activates this phase */
+  atLine: number;
+  sections: TowerSection[];
+  stockTotal: number;
+  debtTotal: number;
+  suspendedLoss?: number;
+  capitalGain?: number;
+  showDebtStack?: boolean;
+  flashZero?: boolean;
+  belowGroundBlock?: { label: string; amount: number };
+  /** Red blocks that animate out during this phase transition */
+  departing?: DepartingBlock[];
+}
+
+export interface StepConfig {
+  id: number;
+  title: string;
+  narration: string[];
+  highlightRule?: string;
+  benjiPose: BenjiPose;
+  phases: TowerPhase[];
 }
 
 export const POSE_MAP: Record<BenjiPose, string> = {
