@@ -427,23 +427,36 @@ export const STEPS: StepConfig[] = [
     id: 8,
     title: "The Capital Gain Trap",
     narration: [
-      "Both towers are empty. $8,000 in suspended losses. Then your business bounces back: $45,000 income!",
-      "Income restores debt basis first: $0 back to $30,000. Remaining $15,000 goes to stock.",
-      "Your $8,000 suspended loss gets used \u2014 stock drops from $15,000 to $7,000.",
+      // 0 — setup: both towers empty, suspended losses
+      "Both towers are empty. $8,000 in suspended losses. But then \u2014 your business bounces back with $45,000 in income.",
+      // 1 — explain what income does BEFORE showing it
+      "Remember the rule: income restores debt basis first, then stock. So watch what happens to the towers.",
+      // 2 — NOW show the towers growing (visual change here)
+      "Debt basis goes from $0 back to $30,000. The remaining $15,000 flows to stock. And that $8,000 suspended loss? It gets used against stock.",
+      // 3 — result after suspended loss (visual: departing + stock at $7K)
+      "Stock basis is now $7,000. Debt basis: $30,000. Both towers are back \u2014 but the stock tower is small.",
+      // 4 — setup the distribution question
       "Now here\u2019s where it gets dangerous. You had a great year, so you take a $22,000 distribution. Seems reasonable, right?",
-      "The first $7,000 comes out tax-free \u2014 that\u2019s covered by your stock basis. Your basis drops to zero.",
-      "But you took $22,000 and only had $7,000 of basis. That means $15,000 went OVER your basis. Watch what happens.",
-      "That $15,000 excess is not just \u2018extra money.\u2019 The IRS treats it as a long-term capital gain. It shows up on your tax return, and you owe tax on every single dollar.",
-      "This is exactly what happens to business owners who don\u2019t track their basis. They take distributions thinking it\u2019s their money \u2014 and it IS their money \u2014 but without enough basis, the IRS says you owe capital gains tax on it.",
-      "Your accountant will see it too: Schedule D, long-term capital gains, $15,000. Fully taxable. No deduction, no offset. It\u2019s a surprise tax bill that could have been avoided.",
-      "And there\u2019s another trap waiting. Remember that $30,000 loan your company still owes you? If they repay it while your debt basis is low or zero, you could face ordinary income on the difference. That\u2019s a whole separate tax hit.",
-      "This is why basis tracking matters. If you had known your basis was only $7,000, you could have limited your distribution or contributed more capital first. Track your basis. Every year. Talk to your accountant. No exceptions.",
+      // 5 — show the distribution eating stock (visual: departing $7K)
+      "The first $7,000 comes out tax-free \u2014 that\u2019s covered by your stock basis. Watch the stock tower disappear.",
+      // 6 — the key question: why not use debt basis?
+      "Now you might ask: I still have $30,000 of debt basis right there. Why can\u2019t I use that to cover the remaining $15,000?",
+      // 7 — the answer: distributions ONLY hit stock
+      "Here\u2019s the critical rule: distributions can ONLY reduce stock basis. Debt basis is completely off-limits for distributions. Only losses can touch debt basis. So that $30,000 purple tower? It can\u2019t help you here.",
+      // 8 — show the capital gain (visual: capital gain badge appears)
+      "That $15,000 excess goes over your basis. The IRS treats it as a long-term capital gain. It shows up on Schedule D, fully taxable, every single dollar.",
+      // 9 — real-world impact
+      "This is exactly what happens to business owners who don\u2019t track their basis. They see money in the company, take distributions, and get hit with a surprise tax bill their accountant has to break to them.",
+      // 10 — foreshadow step 9
+      "And there\u2019s another trap waiting. That $30,000 loan your company still owes you? If they repay it while your debt basis is low or zero, you could face ordinary income. That\u2019s a whole separate tax hit.",
+      // 11 — closing
+      "This is why basis tracking matters. If you had known your stock basis was only $7,000, you could have limited your distribution or contributed more capital first. Track your basis. Every year. Talk to your accountant. No exceptions.",
     ],
     highlightRule:
-      "IRC \u00A71368(b) \u2014 Distributions over stock basis = capital gain. \u00A71367(b)(2)(A) \u2014 Loan repayment with reduced debt basis = ordinary income. Two traps, one fix: track your basis.",
+      "IRC \u00A71368(b) \u2014 Distributions reduce STOCK basis only, never debt basis. Excess over stock basis = capital gain (Schedule D). Debt basis is only reduced by losses (\u00A71367(a)(2)).",
     benjiPose: "serious",
     phases: [
-      // Line 0: Start with Step 7 ending (empty + suspended $8K)
+      // Line 0-1: Both towers empty + suspended $8K — Benji explains setup
       {
         atLine: 0,
         sections: [],
@@ -453,9 +466,9 @@ export const STEPS: StepConfig[] = [
         showDebtStack: true,
         flashZero: true,
       },
-      // Line 1: Income restores → Stock $15K, Debt $30K (still suspended)
+      // Line 2: NOW towers appear — income restored both + suspended loss used
       {
-        atLine: 1,
+        atLine: 2,
         sections: [
           { id: "stock", label: "Stock Basis", amount: 15000, color: "blue", stack: "stock" },
           { id: "debt", label: "Debt Basis (Restored)", amount: 30000, color: "purple", stack: "debt" },
@@ -465,9 +478,9 @@ export const STEPS: StepConfig[] = [
         suspendedLoss: 8000,
         showDebtStack: true,
       },
-      // Line 2: Suspended loss used → Stock drops to $7K
+      // Line 3: Suspended loss departs, stock drops to $7K
       {
-        atLine: 2,
+        atLine: 3,
         departing: [{ label: "Suspended Loss Used", amount: 8000 }],
         sections: [
           { id: "stock", label: "Stock Basis", amount: 7000, color: "blue", stack: "stock" },
@@ -477,9 +490,9 @@ export const STEPS: StepConfig[] = [
         debtTotal: 30000,
         showDebtStack: true,
       },
-      // Line 4: Tax-free portion eats stock → $0
+      // Line 5: Distribution eats stock — "Watch the stock tower disappear"
       {
-        atLine: 4,
+        atLine: 5,
         departing: [{ label: "Distribution (Tax-Free)", amount: 7000 }],
         sections: [
           { id: "debt", label: "Debt Basis (Restored)", amount: 30000, color: "purple", stack: "debt" },
@@ -489,9 +502,9 @@ export const STEPS: StepConfig[] = [
         showDebtStack: true,
         flashZero: true,
       },
-      // Line 6: Capital gain revealed — the $15K excess
+      // Line 8: Capital gain revealed — "$15,000 excess goes over your basis"
       {
-        atLine: 6,
+        atLine: 8,
         sections: [
           { id: "debt", label: "Debt Basis (Restored)", amount: 30000, color: "purple", stack: "debt" },
         ],
@@ -515,23 +528,36 @@ export const STEPS: StepConfig[] = [
     id: 9,
     title: "The Loan Repayment Trap",
     narration: [
+      // 0 — setup: remind user of the loan, debt tower visible
       "Remember that $30,000 loan your company still owes you? Eventually, the company will pay it back. But here\u2019s what most owners don\u2019t realize: the tax hit depends entirely on your debt basis at that moment.",
-      "Let\u2019s say it\u2019s a new year. Your debt basis is $30,000 \u2014 fully restored from last step. But the business has another rough year and loses $30,000.",
-      "Those losses eat through your debt basis. $30,000 gone. Debt basis is back to zero.",
-      "Now the company writes you a check for $30,000 to repay the loan. You\u2019d think: great, I\u2019m just getting my own money back. But look at the basis.",
-      "Your debt basis is zero. The IRS says: you received $30,000, your basis is $0, so you recognize $30,000 of ordinary income. Not capital gain \u2014 ordinary income, taxed at your full rate.",
-      "Why ordinary and not capital gain? Because your debt basis was reduced by ordinary business losses. The IRS treats the repayment as a recapture of those deductions. You got ordinary deductions going in, so you get ordinary income coming out.",
-      "Now compare: what if the business had a PROFITABLE year instead? Say $30,000 of income came in before the repayment.",
-      "That income restores your debt basis back to $30,000 FIRST. Then when the company repays the $30,000 loan, your basis matches the repayment. No gain. No tax.",
-      "The timing matters. Under the tax code, all income and losses for the year are calculated at year-end, before the repayment is evaluated. So even if the company pays you back in January and earns the income in December, the income restores your basis first.",
-      "This is the final lesson. Two identical loan repayments \u2014 same $30,000 \u2014 completely different outcomes. One year with losses? You owe tax on every dollar. One year with income? Tax-free. Your accountant needs to be tracking this.",
+      // 1 — explain the loss scenario BEFORE showing it
+      "Let\u2019s say it\u2019s a new year. Your debt basis is $30,000 \u2014 fully restored from last step. But the business has another rough year.",
+      // 2 — NOW show the loss eating debt basis (visual: departing)
+      "The business loses $30,000. Watch the debt tower disappear. Debt basis is back to zero.",
+      // 3 — setup the repayment, towers are empty
+      "Now the company writes you a check for $30,000 to repay the loan. You\u2019d think: great, I\u2019m just getting my own money back.",
+      // 4 — reveal the problem (visual: ordinary income badge)
+      "But your debt basis is zero. The IRS says: you received $30,000, your basis is $0. That means $30,000 of ordinary income. Not capital gain \u2014 ordinary income, taxed at your full rate.",
+      // 5 — explain WHY ordinary
+      "Why ordinary and not capital gain? Because your debt basis was reduced by ordinary business losses. The IRS treats the repayment as a recapture of those deductions. Ordinary deductions going in, ordinary income coming out.",
+      // 6 — transition to the SAFE scenario
+      "But now let\u2019s compare. What if, instead of losses, the business had a PROFITABLE year?",
+      // 7 — explain the good scenario BEFORE showing it
+      "Say $30,000 of income came in before the repayment. That income restores your debt basis back to $30,000 first.",
+      // 8 — NOW show the debt tower reappearing (visual change)
+      "Watch the debt tower rebuild. Basis is back to $30,000. Now when the company repays the loan, your basis matches the repayment. No gain. No tax.",
+      // 9 — year-end netting rule (visual: tower disappears cleanly)
+      "And here\u2019s the best part: even if the company pays you back in January and earns the income in December, the tax code calculates everything at year-end. The income restores your basis before the repayment is evaluated.",
+      // 10 — final lesson
+      "Two identical loan repayments \u2014 same $30,000 \u2014 completely different outcomes. One year with losses? You owe tax on every dollar. One year with income? Tax-free.",
+      // 11 — closing CTA
       "Track your basis. Know your debt basis before taking any loan repayments. And always \u2014 always \u2014 talk to your accountant before making these decisions. That\u2019s what they\u2019re there for.",
     ],
     highlightRule:
       "IRC \u00A71367(b)(2)(A) \u2014 Loan repayment exceeding debt basis = ordinary income (Rev. Rul. 64-162). Year-end netting under Treas. Reg. \u00A71.1367-2(a) allows same-year income to restore basis before repayment is evaluated.",
     benjiPose: "serious",
     phases: [
-      // Line 0: Start with Step 8 ending state (Stock $0, Debt $30K restored)
+      // Line 0-1: Debt tower visible, Benji explains context and upcoming loss
       {
         atLine: 0,
         sections: [
@@ -542,7 +568,7 @@ export const STEPS: StepConfig[] = [
         showDebtStack: true,
         flashZero: true,
       },
-      // Line 2: Losses eat debt basis → $0
+      // Line 2: "Watch the debt tower disappear" — loss departs
       {
         atLine: 2,
         departing: [{ label: "Business Loss", amount: 30000 }],
@@ -552,7 +578,7 @@ export const STEPS: StepConfig[] = [
         showDebtStack: true,
         flashZero: true,
       },
-      // Line 4: Loan repayment with zero basis = ordinary income
+      // Line 4: "The IRS says... $30,000 of ordinary income" — badge appears
       {
         atLine: 4,
         sections: [],
@@ -563,20 +589,19 @@ export const STEPS: StepConfig[] = [
         flashZero: true,
         belowGroundBlock: { label: "Loan Repayment \u2192 Ordinary Income", amount: 30000 },
       },
-      // Line 7: The safe scenario — income restores basis first
+      // Line 8: "Watch the debt tower rebuild" — safe scenario shown
       {
-        atLine: 7,
+        atLine: 8,
         sections: [
           { id: "debt-safe", label: "Debt Basis (Restored)", amount: 30000, color: "purple", stack: "debt" },
         ],
         stockTotal: 0,
         debtTotal: 30000,
         showDebtStack: true,
-        flashZero: true,
       },
-      // Line 8: Year-end netting — repayment with full basis = no tax
+      // Line 9: Year-end netting — repayment with full basis = no tax, tower gone cleanly
       {
-        atLine: 8,
+        atLine: 9,
         sections: [],
         stockTotal: 0,
         debtTotal: 0,
