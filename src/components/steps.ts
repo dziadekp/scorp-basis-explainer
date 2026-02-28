@@ -248,12 +248,13 @@ export const STEPS: StepConfig[] = [
     narration: [
       "Your stock basis is zero. Those $12,000 in suspended losses are stuck. Unless...",
       "You personally loan $30,000 to your S-Corp. That creates DEBT BASIS \u2014 a whole second tower!",
-      "Important: only direct loans from YOU count. Bank loans you guarantee? They do NOT create debt basis.",
-      "Now here\u2019s the magic: those $12,000 in suspended losses can finally be used! They reduce your debt basis.",
-      "$30,000 minus $12,000 = $18,000 debt basis remaining. Suspended losses: gone!",
+      "Important: only direct loans from YOU to the corporation count. Bank loans you guarantee? They do NOT create debt basis.",
+      "Now here\u2019s the strategy: those $12,000 in suspended losses can finally be used against your new debt basis.",
+      "$30,000 minus $12,000 = $18,000 debt basis remaining. The suspended losses are absorbed.",
+      "This is one scenario where loaning money directly to your business can unlock those stuck losses. But always discuss this with your accountant first \u2014 whether this creates a positive outcome depends on your specific tax situation.",
     ],
     highlightRule:
-      "IRC \u00A71366(d)(1)(B) \u2014 Debt basis from direct shareholder loans absorbs suspended losses. Per Rev. Rul. 75-144, guarantees don\u2019t count.",
+      "IRC \u00A71366(d)(1)(B) \u2014 Debt basis from direct shareholder loans absorbs suspended losses. Per Rev. Rul. 75-144, guarantees don\u2019t count. Always consult your tax advisor.",
     benjiPose: "presenting",
     phases: [
       // Line 0: Stock $0 + suspended $12K (Step 4 ending)
@@ -302,12 +303,13 @@ export const STEPS: StepConfig[] = [
     narration: [
       "Stock basis is $0. Debt basis is $18,000 \u2014 it was $30,000 but losses reduced it by $12,000.",
       "This year your business earns $25,000. Great! But where does that income go?",
-      "First, $12,000 restores your debt basis back to its original $30,000. The company pays you back first.",
-      "The remaining $13,000 THEN flows to stock basis.",
-      "Stock: $13,000. Debt: $30,000. The rule: income restores debt before building stock.",
+      "First, $12,000 restores your debt basis back to its original $30,000. Now \u2014 this is important \u2014 this is NOT the same as the company paying you back.",
+      "Restoration means the income rebuilt your debt basis on paper. The $30,000 loan is still outstanding. No cash changed hands. You\u2019re still owed that money.",
+      "The remaining $13,000 THEN flows to stock basis. Stock: $13,000. Debt: $30,000.",
+      "The rule: income restores debt basis before building stock. But the loan itself? That\u2019s still sitting on the company\u2019s books until they actually repay you.",
     ],
     highlightRule:
-      "IRC \u00A71367(b)(2)(B) \u2014 When debt basis was reduced by losses, income restores it before increasing stock basis.",
+      "IRC \u00A71367(b)(2)(B) \u2014 Income restores reduced debt basis before increasing stock. Restoration \u2260 repayment: the loan remains outstanding.",
     benjiPose: "presenting",
     phases: [
       // Line 0: Start with Step 5 ending (Stock $0, Debt $18K)
@@ -332,9 +334,9 @@ export const STEPS: StepConfig[] = [
         showDebtStack: true,
         flashZero: true,
       },
-      // Line 3: Remaining $13K goes to stock
+      // Line 4: Remaining $13K goes to stock
       {
-        atLine: 3,
+        atLine: 4,
         sections: [
           { id: "stock-restored", label: "Stock Basis", amount: 13000, color: "blue", stack: "stock" },
           { id: "debt-full", label: "Debt Basis (Restored)", amount: 30000, color: "purple", stack: "debt" },
@@ -358,11 +360,12 @@ export const STEPS: StepConfig[] = [
       "But this year is terrible \u2014 your business loses $51,000.",
       "Losses eat through stock first: $13,000 gone. Stock hits zero.",
       "Remaining losses hit debt basis: $30,000 gone. Debt hits zero too.",
-      "Total deducted: $43,000. But you had $51,000 in losses.",
-      "The remaining $8,000? Suspended again. Both towers are empty.",
+      "Total deducted: $43,000. But you had $51,000 in losses. The remaining $8,000? Suspended again.",
+      "Now you might ask: wait, didn\u2019t the income in the last step \u2018pay back\u2019 the debt? No. Restoration and repayment are two completely different things under the tax code.",
+      "The loan is still outstanding \u2014 your company still owes you $30,000. What got reduced to zero is the BASIS, not the loan itself. That distinction matters a lot when the company eventually writes you a check.",
     ],
     highlightRule:
-      "IRC \u00A71366(d)(1) \u2014 Total deductible losses limited to stock basis + debt basis combined. Excess carries forward.",
+      "IRC \u00A71366(d)(1) \u2014 Losses limited to stock + debt basis combined. Restoration (\u00A71367(b)(2)(B)) \u2260 repayment (\u00A71367(b)(2)(A)). The loan stays outstanding.",
     benjiPose: "whispering",
     phases: [
       // Line 0: Start with Step 6 ending (Stock $13K, Debt $30K)
@@ -398,9 +401,9 @@ export const STEPS: StepConfig[] = [
         showDebtStack: true,
         flashZero: true,
       },
-      // Line 5: Suspended $8K
+      // Line 4: Suspended $8K
       {
-        atLine: 5,
+        atLine: 4,
         sections: [],
         stockTotal: 0,
         debtTotal: 0,
@@ -432,10 +435,11 @@ export const STEPS: StepConfig[] = [
       "That $15,000 excess is not just \u2018extra money.\u2019 The IRS treats it as a long-term capital gain. It shows up on your tax return, and you owe tax on every single dollar.",
       "This is exactly what happens to business owners who don\u2019t track their basis. They take distributions thinking it\u2019s their money \u2014 and it IS their money \u2014 but without enough basis, the IRS says you owe capital gains tax on it.",
       "Your accountant will see it too: Schedule D, long-term capital gains, $15,000. Fully taxable. No deduction, no offset. It\u2019s a surprise tax bill that could have been avoided.",
-      "This is why basis tracking matters. If you had known your basis was only $7,000, you could have limited your distribution or contributed more capital first. Track your basis. Every year. No exceptions.",
+      "And there\u2019s another trap waiting. Remember that $30,000 loan your company still owes you? If they repay it while your debt basis is low or zero, you could face ordinary income on the difference. That\u2019s a whole separate tax hit.",
+      "This is why basis tracking matters. If you had known your basis was only $7,000, you could have limited your distribution or contributed more capital first. Track your basis. Every year. Talk to your accountant. No exceptions.",
     ],
     highlightRule:
-      "IRC \u00A71368(b) \u2014 Distributions exceeding stock basis are capital gain. Here: $22K distribution \u2212 $7K basis = $15K long-term capital gain reported on Schedule D.",
+      "IRC \u00A71368(b) \u2014 Distributions over stock basis = capital gain. \u00A71367(b)(2)(A) \u2014 Loan repayment with reduced debt basis = ordinary income. Two traps, one fix: track your basis.",
     benjiPose: "serious",
     phases: [
       // Line 0: Start with Step 7 ending (empty + suspended $8K)
