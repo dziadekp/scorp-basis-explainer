@@ -17,13 +17,11 @@ const SECTION_COLORS: Record<string, { bg: string; border: string; text: string 
 interface ProportionalTowerProps {
   step: StepConfig;
   animationKey: number;
-  interactiveExtra: { stockDelta: number; debtDelta: number };
 }
 
 export default function ProportionalTower({
   step,
   animationKey,
-  interactiveExtra,
 }: ProportionalTowerProps) {
   const stockRef = useRef<HTMLDivElement>(null);
   const debtRef = useRef<HTMLDivElement>(null);
@@ -34,8 +32,8 @@ export default function ProportionalTower({
   const stockSections = filterSections(step.sections, "stock");
   const debtSections = filterSections(step.sections, "debt");
 
-  const effectiveStockTotal = Math.max(0, step.stockTotal + interactiveExtra.stockDelta);
-  const effectiveDebtTotal = Math.max(0, step.debtTotal + interactiveExtra.debtDelta);
+  const effectiveStockTotal = step.stockTotal;
+  const effectiveDebtTotal = step.debtTotal;
 
   useEffect(() => {
     const tl = gsap.timeline({ defaults: { ease: "power2.out" } });

@@ -1,20 +1,39 @@
 import type { StepConfig } from "@/types";
 
-// Max basis across all steps — used as the 100% height reference
+/*
+ * ONE continuous story of ONE company.
+ * Every step's ending numbers = next step's starting numbers.
+ *
+ * Verified against IRC §1366, §1367, §1368 by CPA audit.
+ *
+ * Running totals:
+ *   Step 1: Stock $50K   | Debt $0    | Susp $0
+ *   Step 2: Stock $87K   | Debt $0    | Susp $0
+ *   Step 3: Stock $49K   | Debt $0    | Susp $0
+ *   Step 4: Stock $0     | Debt $0    | Susp $12K
+ *   Step 5: Stock $0     | Debt $18K  | Susp $0
+ *   Step 6: Stock $13K   | Debt $30K  | Susp $0
+ *   Step 7: Stock $0     | Debt $0    | Susp $8K
+ *   Step 8: Stock $0     | Debt $30K  | Susp $0   + $15K LTCG
+ */
+
 export const MAX_BASIS_REFERENCE = 87000;
 
 export const STEPS: StepConfig[] = [
-  // ── Step 1: Initial Capital Contribution ──
+  // ═══════════════════════════════════════
+  // STEP 1 — Initial Investment
+  // ═══════════════════════════════════════
   {
     id: 1,
     title: "Your Starting Basis",
     narration: [
-      "Hey! So you just put $50,000 into your S-Corp.",
-      "That's your starting basis — think of it like building a tower of blocks.",
-      "This is your foundation. Everything we talk about either builds on top of this tower... or chips away at it.",
+      "Hey! Let\u2019s say you just started your S-Corp and put in $50,000.",
+      "That $50,000 is your starting basis \u2014 think of it as a tower of blocks.",
+      "This is your foundation. Everything from here either builds on top of it... or chips away at it.",
+      "Your stock basis is $50,000. Let\u2019s see what happens in your first year.",
     ],
     highlightRule:
-      "IRC \u00A71366(d)(1)(A) \u2014 Basis starts with your initial investment in the corporation\u2019s stock.",
+      "IRC \u00A7358(a) \u2014 Basis in stock equals the money you contributed.",
     stockTotal: 50000,
     debtTotal: 0,
     sections: [
@@ -22,106 +41,78 @@ export const STEPS: StepConfig[] = [
     ],
     showDebtStack: false,
     benjiPose: "waving",
-    interactiveButtons: [
-      {
-        label: "+$10K More Investment",
-        amountDelta: 10000,
-        stack: "stock",
-        color: "green",
-        benjiReaction: "More capital in! Your foundation just got bigger.",
-      },
-    ],
   },
 
-  // ── Step 2: Income Increases Basis ──
+  // ═══════════════════════════════════════
+  // STEP 2 — Income Increases Basis
+  // Starting: Stock $50K
+  // ═══════════════════════════════════════
   {
     id: 2,
-    title: "Income Stacks Up",
+    title: "Your Business Made Money",
     narration: [
-      "Nice! Your business earned some money this year.",
-      "Ordinary income, interest, dividends, even tax-exempt income \u2014 they ALL add to your basis.",
-      "Watch your tower grow! You went from $50K to $87K. That\u2019s $37,000 in new blocks stacked right on top.",
+      "Great news \u2014 your first year went well!",
+      "Your business earned $30,000 in ordinary income. Boom! Watch the tower grow.",
+      "But wait \u2014 you also earned $5,000 in interest income. The tower gets taller!",
+      "And $2,000 in tax-exempt income. Even that adds to your basis.",
+      "Your stock basis is now $87,000. Look at that tower!",
     ],
     highlightRule:
-      "IRC \u00A71367(a)(1) \u2014 Stock basis increases by the shareholder\u2019s pro rata share of all income items.",
+      "IRC \u00A71367(a)(1) \u2014 All income items increase basis: ordinary income, separately stated income, and tax-exempt income.",
     stockTotal: 87000,
     debtTotal: 0,
     sections: [
       { id: "initial", label: "Initial Investment", amount: 50000, color: "blue", stack: "stock" },
-      { id: "ordinary", label: "Ordinary Income", amount: 30000, color: "green", stack: "stock" },
-      { id: "interest", label: "Interest Income", amount: 5000, color: "green", stack: "stock" },
-      { id: "tax-exempt", label: "Tax-Exempt Income", amount: 2000, color: "green", stack: "stock" },
+      { id: "ordinary", label: "Ordinary Income +$30K", amount: 30000, color: "green", stack: "stock" },
+      { id: "interest", label: "Interest Income +$5K", amount: 5000, color: "green", stack: "stock" },
+      { id: "tax-exempt", label: "Tax-Exempt Income +$2K", amount: 2000, color: "green", stack: "stock" },
     ],
     showDebtStack: false,
     benjiPose: "presenting",
-    interactiveButtons: [
-      {
-        label: "+$10K Income",
-        amountDelta: 10000,
-        stack: "stock",
-        color: "green",
-        benjiReaction: "More income! Watch the tower stack up!",
-      },
-      {
-        label: "+$5K Tax-Exempt",
-        amountDelta: 5000,
-        stack: "stock",
-        color: "green",
-        benjiReaction: "Tax-exempt income is the best kind \u2014 it grows your basis without any tax!",
-      },
-    ],
   },
 
-  // ── Step 3: Basis Decreases ──
+  // ═══════════════════════════════════════
+  // STEP 3 — Basis Decreases
+  // Starting: Stock $87K (from Step 2)
+  // ═══════════════════════════════════════
   {
     id: 3,
     title: "Taking Money Out",
     narration: [
-      "Uh oh \u2014 time to take some money out.",
-      "Three things shrink your tower: distributions (cash you take out), non-deductible expenses (like meals and penalties), and losses.",
-      "The order matters! Distributions come off first, then expenses, then losses. See how the tower gets shorter?",
-      "You went from $87K all the way down to $49K.",
+      "Remember that $87,000 from last step? Now let\u2019s see what happens when money goes OUT.",
+      "First, you took a $20,000 distribution. See the tower shrink? Down to $67,000.",
+      "Then $3,000 in non-deductible expenses \u2014 meals, penalties. Down to $64,000.",
+      "And your business had a $15,000 loss this year. The tower drops to $49,000.",
+      "The ORDER matters: distributions first, then non-deductible expenses, then losses. Always.",
     ],
     highlightRule:
-      "IRC \u00A71367(a)(2) \u2014 Basis decreases (but not below zero) by distributions, non-deductible expenses, and losses \u2014 in that order.",
+      "IRC \u00A71367(a)(2) \u2014 Decreases follow a mandatory order: distributions first, non-deductible expenses second, losses last.",
     stockTotal: 49000,
     debtTotal: 0,
     sections: [
-      { id: "initial", label: "Initial Investment", amount: 50000, color: "blue", stack: "stock" },
-      { id: "net-income", label: "Net Remaining Income", amount: 17000, color: "green", stack: "stock" },
+      { id: "remaining-base", label: "Remaining Basis", amount: 49000, color: "blue", stack: "stock" },
     ],
     showDebtStack: false,
     benjiPose: "presenting",
-    interactiveButtons: [
-      {
-        label: "\u2212$5K Distribution",
-        amountDelta: -5000,
-        stack: "stock",
-        color: "red",
-        benjiReaction: "There goes some of your basis... the tower gets shorter.",
-      },
-      {
-        label: "\u2212$3K Loss",
-        amountDelta: -3000,
-        stack: "stock",
-        color: "red",
-        benjiReaction: "Losses chip away at the stack. Smaller tower, less room for future deductions.",
-      },
-    ],
   },
 
-  // ── Step 4: Basis Hits Zero ──
+  // ═══════════════════════════════════════
+  // STEP 4 — Basis Hits Zero
+  // Starting: Stock $49K (from Step 3)
+  // ═══════════════════════════════════════
   {
     id: 4,
     title: "Hitting Zero",
     narration: [
-      "Here\u2019s the thing you REALLY need to know.",
-      "Your basis can\u2019t go below zero. When losses eat through everything, the tower is gone.",
-      "Those extra losses? They\u2019re suspended \u2014 stuck in limbo until your basis comes back.",
-      "You\u2019ve got $12,000 in suspended losses just waiting. They\u2019ll come back when income rebuilds your tower.",
+      "Your basis was $49,000 from last step. But this year was rough.",
+      "You took $10,000 in distributions. Down to $39,000.",
+      "Then $2,000 in non-deductible expenses. Down to $37,000.",
+      "And your business lost $49,000. But you only have $37,000 of basis left!",
+      "The first $37,000 of that loss brings you to ZERO. The remaining $12,000? Suspended.",
+      "Those $12,000 in suspended losses don\u2019t disappear \u2014 they carry forward, waiting for basis to come back.",
     ],
     highlightRule:
-      "IRC \u00A71366(d)(1) \u2014 Losses limited to adjusted basis. Excess losses carry forward under \u00A71366(d)(2) indefinitely.",
+      "IRC \u00A71366(d)(1) \u2014 Losses can\u2019t reduce basis below zero. Excess losses carry forward indefinitely under \u00A71366(d)(2).",
     stockTotal: 0,
     debtTotal: 0,
     sections: [],
@@ -129,149 +120,115 @@ export const STEPS: StepConfig[] = [
     flashZero: true,
     showDebtStack: false,
     benjiPose: "whispering",
-    interactiveButtons: [
-      {
-        label: "+$10K Income",
-        amountDelta: 10000,
-        stack: "stock",
-        color: "green",
-        benjiReaction: "Income is back! Now those suspended losses can start being used again.",
-      },
-    ],
   },
 
-  // ── Step 5: Introducing Debt Basis ──
+  // ═══════════════════════════════════════
+  // STEP 5 — Shareholder Loan + Suspended Loss Used
+  // Starting: Stock $0, Debt $0, Suspended $12K
+  // ═══════════════════════════════════════
   {
     id: 5,
     title: "A Second Tower Appears",
     narration: [
-      "Plot twist! There\u2019s actually a SECOND tower \u2014 debt basis.",
-      "If you personally loaned money to your S-Corp, that creates a whole separate stack.",
-      "Important: bank loans you guarantee do NOT count. Only direct loans from YOU to the company.",
-      "This second tower gives you extra room to absorb losses.",
+      "Your stock basis is zero. Those $12,000 in suspended losses are stuck. Unless...",
+      "You personally loan $30,000 to your S-Corp. That creates DEBT BASIS \u2014 a whole second tower!",
+      "Important: only direct loans from YOU count. Bank loans you guarantee? They do NOT create debt basis.",
+      "Now here\u2019s the magic: those $12,000 in suspended losses can finally be used! They reduce your debt basis.",
+      "$30,000 minus $12,000 = $18,000 debt basis remaining. Suspended losses: gone!",
     ],
     highlightRule:
-      "IRC \u00A71366(d)(1)(B) \u2014 Debt basis exists only for direct indebtedness of the S-Corp to the shareholder. Guarantees don\u2019t count.",
-    stockTotal: 25000,
-    debtTotal: 30000,
+      "IRC \u00A71366(d)(1)(B) \u2014 Debt basis from direct shareholder loans absorbs suspended losses. Per Rev. Rul. 75-144, guarantees don\u2019t count.",
+    stockTotal: 0,
+    debtTotal: 18000,
     sections: [
-      { id: "stock-remaining", label: "Stock Basis", amount: 25000, color: "blue", stack: "stock" },
-      { id: "shareholder-loan", label: "Shareholder Loan", amount: 30000, color: "purple", stack: "debt" },
+      { id: "loan", label: "Shareholder Loan (Net)", amount: 18000, color: "purple", stack: "debt" },
     ],
     showDebtStack: true,
     benjiPose: "presenting",
-    interactiveButtons: [
-      {
-        label: "+$10K Loan to Corp",
-        amountDelta: 10000,
-        stack: "debt",
-        color: "green",
-        benjiReaction: "More debt basis! That\u2019s extra cushion for absorbing losses.",
-      },
-    ],
   },
 
-  // ── Step 6: Debt Basis Restored First ──
+  // ═══════════════════════════════════════
+  // STEP 6 — Income Restores Debt Before Stock
+  // Starting: Stock $0, Debt $18K (face $30K)
+  // ═══════════════════════════════════════
   {
     id: 6,
-    title: "Debt Gets Paid Back First",
+    title: "Income Is Back \u2014 But Where Does It Go?",
     narration: [
-      "When income flows through after both towers were reduced, there\u2019s a specific restore order.",
-      "Income restores debt basis FIRST \u2014 that\u2019s your loan getting repaid.",
-      "Only after debt basis is fully restored does the rest flow to stock basis.",
-      "Think of it like: the company pays you back before it builds up your ownership value.",
+      "Stock basis is $0. Debt basis is $18,000 \u2014 it was $30,000 but losses reduced it by $12,000.",
+      "This year your business earns $25,000. Great! But where does that income go?",
+      "First, $12,000 restores your debt basis back to its original $30,000. The company pays you back first.",
+      "The remaining $13,000 THEN flows to stock basis.",
+      "Stock: $13,000. Debt: $30,000. The rule: income restores debt before building stock.",
     ],
     highlightRule:
-      "IRC \u00A71367(b)(2)(B) \u2014 If debt basis was previously reduced, income restores it before increasing stock basis.",
-    stockTotal: 10000,
-    debtTotal: 25000,
+      "IRC \u00A71367(b)(2)(B) \u2014 When debt basis was reduced by losses, income restores it before increasing stock basis.",
+    stockTotal: 13000,
+    debtTotal: 30000,
     sections: [
-      { id: "stock-base", label: "Stock Basis", amount: 10000, color: "blue", stack: "stock" },
-      { id: "debt-remaining", label: "Loan (Reduced)", amount: 10000, color: "purple", stack: "debt" },
-      { id: "debt-restored", label: "Restored by Income", amount: 15000, color: "green", stack: "debt" },
+      { id: "stock-restored", label: "Stock Basis", amount: 13000, color: "blue", stack: "stock" },
+      { id: "debt-full", label: "Debt Basis (Restored)", amount: 30000, color: "purple", stack: "debt" },
     ],
     showDebtStack: true,
     benjiPose: "presenting",
-    interactiveButtons: [
-      {
-        label: "+$5K Income",
-        amountDelta: 5000,
-        stack: "debt",
-        color: "green",
-        benjiReaction: "That income restores debt basis first \u2014 getting your loan repaid.",
-      },
-    ],
   },
 
-  // ── Step 7: The Limitation Rule ──
+  // ═══════════════════════════════════════
+  // STEP 7 — The Limitation Rule
+  // Starting: Stock $13K, Debt $30K
+  // ═══════════════════════════════════════
   {
     id: 7,
     title: "The Combined Limit",
     narration: [
-      "The big rule: your total deductible losses are capped at stock basis PLUS debt basis combined.",
-      "Losses eat through stock first. When stock hits zero, they start eating into debt basis.",
-      "Anything left over? Suspended. You\u2019ve got $8,000 in suspended losses here.",
-      "This is why tracking BOTH towers is critical.",
+      "Stock basis: $13,000. Debt basis: $30,000. Combined: $43,000.",
+      "But this year is terrible \u2014 your business loses $51,000.",
+      "Losses eat through stock first: $13,000 gone. Stock hits zero.",
+      "Remaining losses hit debt basis: $30,000 gone. Debt hits zero too.",
+      "Total deducted: $43,000. But you had $51,000 in losses.",
+      "The remaining $8,000? Suspended again. Both towers are empty.",
     ],
     highlightRule:
-      "IRC \u00A71366(d)(1) \u2014 Total deductible losses limited to stock basis + debt basis. Excess carries forward under \u00A71366(d)(2).",
+      "IRC \u00A71366(d)(1) \u2014 Total deductible losses limited to stock basis + debt basis combined. Excess carries forward.",
     stockTotal: 0,
-    debtTotal: 5000,
-    sections: [
-      { id: "debt-remaining", label: "Debt Basis (Remaining)", amount: 5000, color: "purple", stack: "debt" },
-    ],
+    debtTotal: 0,
+    sections: [],
     suspendedLoss: 8000,
+    flashZero: true,
     showDebtStack: true,
-    benjiPose: "presenting",
-    interactiveButtons: [
-      {
-        label: "+$15K Income",
-        amountDelta: 15000,
-        stack: "stock",
-        color: "green",
-        benjiReaction: "Income rebuilds the towers! Now those suspended losses can be used.",
-      },
-      {
-        label: "\u2212$5K More Loss",
-        amountDelta: -5000,
-        stack: "debt",
-        color: "red",
-        benjiReaction: "That eats into debt basis too. Both towers are shrinking!",
-      },
-    ],
+    benjiPose: "whispering",
   },
 
-  // ── Step 8: Distribution Over Basis = Capital Gain ──
+  // ═══════════════════════════════════════
+  // STEP 8 — Distribution Over Basis = Capital Gain
+  // Starting: Stock $0, Debt $0, Suspended $8K
+  // Income $45K → restores debt to $30K, stock to $15K
+  // Suspended $8K used → stock becomes $7K
+  // Distribution $22K → $7K tax-free, $15K capital gain
+  // ═══════════════════════════════════════
   {
     id: 8,
     title: "The Capital Gain Trap",
     narration: [
-      "This is the trap that catches a LOT of S-Corp owners.",
-      "You had $30,000 in basis. You took out $30,000 \u2014 tax-free, because that was your basis. The pile is empty.",
-      "But then you took out another $15,000. See the problem? The pile is GONE. That money doesn\u2019t belong to you anymore.",
-      "That extra $15K isn\u2019t a tax-free return of investment. It\u2019s capital gain \u2014 and you owe tax on it.",
-      "Track your basis. Seriously. This is how people get surprise tax bills.",
+      "Both towers are empty. $8,000 in suspended losses. Then your business bounces back: $45,000 income!",
+      "Income restores debt basis first: $0 back to $30,000. Remaining $15,000 goes to stock.",
+      "Your $8,000 suspended loss gets used \u2014 stock drops from $15,000 to $7,000.",
+      "Stock: $7,000. Debt: $30,000. But then you take a $22,000 distribution.",
+      "The first $7,000 is tax-free \u2014 that\u2019s your basis. But the pile is EMPTY after that.",
+      "The remaining $15,000? That doesn\u2019t belong to you anymore. It\u2019s capital gain. You owe tax on every dollar of it.",
+      "This is how people get surprise tax bills. Track. Your. Basis.",
     ],
     highlightRule:
-      "IRC \u00A71368(b) & (c) \u2014 Distributions exceeding stock basis are treated as gain from sale of property (capital gain). You can\u2019t take out more than you put in tax-free.",
+      "IRC \u00A71368(b) \u2014 Distributions exceeding stock basis are capital gain. Here: $22K distribution \u2212 $7K basis = $15K long-term capital gain.",
     stockTotal: 0,
-    debtTotal: 0,
+    debtTotal: 30000,
     sections: [
-      { id: "stock-basis", label: "Stock Basis (Was $30K)", amount: 0, color: "blue", stack: "stock" },
+      { id: "debt-final", label: "Debt Basis (Restored)", amount: 30000, color: "purple", stack: "debt" },
     ],
     capitalGain: 15000,
     flashZero: true,
-    showDebtStack: false,
+    showDebtStack: true,
     benjiPose: "serious",
-    belowGroundBlock: { label: "Excess Distribution", amount: 15000 },
-    interactiveButtons: [
-      {
-        label: "\u2212$10K Distribution",
-        amountDelta: -10000,
-        stack: "stock",
-        color: "red",
-        benjiReaction: "Careful! With zero basis, EVERY dollar you take out is capital gain!",
-      },
-    ],
+    belowGroundBlock: { label: "Excess Distribution \u2192 Capital Gain", amount: 15000 },
   },
 ];

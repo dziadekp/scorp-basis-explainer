@@ -4,21 +4,17 @@ import { useState, useCallback, useEffect } from "react";
 import { STEPS } from "@/components/steps";
 import ProportionalTower from "@/components/ProportionalTower";
 import BenjiNarrator from "@/components/BenjiNarrator";
-import InteractivePanel from "@/components/InteractivePanel";
 import StepControls from "@/components/StepControls";
 import { useVoice } from "@/hooks/useVoice";
-import type { InteractiveButton } from "@/types";
 
 export default function Home() {
   const [currentStep, setCurrentStep] = useState(0);
   const [animationKey, setAnimationKey] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
-  const [interactiveExtra, setInteractiveExtra] = useState({ stockDelta: 0, debtDelta: 0 });
-  const [reactionText, setReactionText] = useState<string | null>(null);
   const [hasStarted, setHasStarted] = useState(false);
 
   const step = STEPS[currentStep];
-  const { speakStep, speakDynamic, stop, isSpeaking } = useVoice({ isMuted });
+  const { speakStep, stop, isSpeaking } = useVoice({ isMuted });
 
   // Persist mute preference
   useEffect(() => {
@@ -30,22 +26,14 @@ export default function Home() {
     localStorage.setItem("benji-muted", String(isMuted));
   }, [isMuted]);
 
-  const resetInteractive = useCallback(() => {
-    setInteractiveExtra({ stockDelta: 0, debtDelta: 0 });
-    setReactionText(null);
-  }, []);
-
   const goToStep = useCallback(
     (index: number) => {
       stop();
       setCurrentStep(index);
       setAnimationKey((k) => k + 1);
-      resetInteractive();
-      setReactionText(null);
-      // Play voice for new step (slight delay for animation sync)
       setTimeout(() => speakStep(STEPS[index].id), 400);
     },
-    [stop, resetInteractive, speakStep]
+    [stop, speakStep]
   );
 
   const goNext = useCallback(() => {
@@ -62,18 +50,6 @@ export default function Home() {
     }
   }, [currentStep, goToStep]);
 
-  const handleInteractive = useCallback(
-    (button: InteractiveButton) => {
-      setInteractiveExtra((prev) => ({
-        stockDelta: prev.stockDelta + (button.stack === "stock" ? button.amountDelta : 0),
-        debtDelta: prev.debtDelta + (button.stack === "debt" ? button.amountDelta : 0),
-      }));
-      setReactionText(button.benjiReaction);
-      speakDynamic(button.benjiReaction);
-    },
-    [speakDynamic]
-  );
-
   const toggleMute = useCallback(() => {
     setIsMuted((m) => {
       if (!m) stop();
@@ -86,7 +62,7 @@ export default function Home() {
     speakStep(STEPS[0].id);
   }, [speakStep]);
 
-  // Start screen
+  // ── Start Screen ──
   if (!hasStarted) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-6">
@@ -100,10 +76,10 @@ export default function Home() {
             S-Corp Shareholder Basis
           </h1>
           <p className="text-slate-400 mb-2">
-            An interactive visual guide to understanding stock basis and debt basis
+            A visual guide to understanding stock basis and debt basis
           </p>
           <p className="text-sm text-slate-500 mb-8">
-            Benji will walk you through 8 key concepts with animations you can interact with.
+            Follow one company through 8 real scenarios. Benji will walk you through every step.
           </p>
           <button
             onClick={handleStart}
@@ -119,6 +95,7 @@ export default function Home() {
     );
   }
 
+  // ── Main App ──
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
@@ -164,7 +141,6 @@ export default function Home() {
             <ProportionalTower
               step={step}
               animationKey={animationKey}
-              interactiveExtra={interactiveExtra}
             />
           </div>
 
@@ -178,12 +154,11 @@ export default function Home() {
               <h2 className="text-xl font-bold text-white mt-0.5">{step.title}</h2>
             </div>
 
-            {/* Benji */}
+            {/* Benji narrator */}
             <div className="flex-1 overflow-y-auto">
               <BenjiNarrator
                 pose={step.benjiPose}
                 narrationLines={step.narration}
-                reactionText={reactionText}
                 animationKey={animationKey}
                 isSpeaking={isSpeaking}
               />
@@ -196,14 +171,6 @@ export default function Home() {
                   </p>
                 </div>
               )}
-
-              {/* Interactive buttons */}
-              <InteractivePanel
-                buttons={step.interactiveButtons || []}
-                onAction={handleInteractive}
-                onReset={resetInteractive}
-                hasChanges={interactiveExtra.stockDelta !== 0 || interactiveExtra.debtDelta !== 0}
-              />
             </div>
 
             {/* Navigation */}

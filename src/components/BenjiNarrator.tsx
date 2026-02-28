@@ -10,7 +10,6 @@ import { useTypewriter } from "@/hooks/useTypewriter";
 interface BenjiNarratorProps {
   pose: BenjiPose;
   narrationLines: string[];
-  reactionText?: string | null;
   animationKey: number;
   isSpeaking: boolean;
 }
@@ -18,7 +17,6 @@ interface BenjiNarratorProps {
 export default function BenjiNarrator({
   pose,
   narrationLines,
-  reactionText,
   animationKey,
   isSpeaking,
 }: BenjiNarratorProps) {
@@ -96,15 +94,6 @@ export default function BenjiNarrator({
             </p>
           )}
         </div>
-
-        {/* Reaction overlay */}
-        {reactionText && (
-          <div className="mt-3 pt-3 border-t border-slate-700/50">
-            <p className="text-sm text-blue-300 font-medium italic">
-              {reactionText}
-            </p>
-          </div>
-        )}
 
         {!isComplete && (
           <button
