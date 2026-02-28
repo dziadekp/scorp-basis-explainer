@@ -426,13 +426,16 @@ export const STEPS: StepConfig[] = [
       "Both towers are empty. $8,000 in suspended losses. Then your business bounces back: $45,000 income!",
       "Income restores debt basis first: $0 back to $30,000. Remaining $15,000 goes to stock.",
       "Your $8,000 suspended loss gets used \u2014 stock drops from $15,000 to $7,000.",
-      "Stock: $7,000. Debt: $30,000. But then you take a $22,000 distribution.",
-      "The first $7,000 is tax-free \u2014 that\u2019s your basis. But the pile is EMPTY after that.",
-      "The remaining $15,000? That doesn\u2019t belong to you anymore. It\u2019s capital gain. You owe tax on every dollar of it.",
-      "This is how people get surprise tax bills. Track. Your. Basis.",
+      "Now here\u2019s where it gets dangerous. You had a great year, so you take a $22,000 distribution. Seems reasonable, right?",
+      "The first $7,000 comes out tax-free \u2014 that\u2019s covered by your stock basis. Your basis drops to zero.",
+      "But you took $22,000 and only had $7,000 of basis. That means $15,000 went OVER your basis. Watch what happens.",
+      "That $15,000 excess is not just \u2018extra money.\u2019 The IRS treats it as a long-term capital gain. It shows up on your tax return, and you owe tax on every single dollar.",
+      "This is exactly what happens to business owners who don\u2019t track their basis. They take distributions thinking it\u2019s their money \u2014 and it IS their money \u2014 but without enough basis, the IRS says you owe capital gains tax on it.",
+      "Your accountant will see it too: Schedule D, long-term capital gains, $15,000. Fully taxable. No deduction, no offset. It\u2019s a surprise tax bill that could have been avoided.",
+      "This is why basis tracking matters. If you had known your basis was only $7,000, you could have limited your distribution or contributed more capital first. Track your basis. Every year. No exceptions.",
     ],
     highlightRule:
-      "IRC \u00A71368(b) \u2014 Distributions exceeding stock basis are capital gain. Here: $22K distribution \u2212 $7K basis = $15K long-term capital gain.",
+      "IRC \u00A71368(b) \u2014 Distributions exceeding stock basis are capital gain. Here: $22K distribution \u2212 $7K basis = $15K long-term capital gain reported on Schedule D.",
     benjiPose: "serious",
     phases: [
       // Line 0: Start with Step 7 ending (empty + suspended $8K)
@@ -469,7 +472,7 @@ export const STEPS: StepConfig[] = [
         debtTotal: 30000,
         showDebtStack: true,
       },
-      // Line 4: Tax-free distribution eats stock → $0
+      // Line 4: Tax-free portion eats stock → $0
       {
         atLine: 4,
         departing: [{ label: "Distribution (Tax-Free)", amount: 7000 }],
@@ -481,9 +484,9 @@ export const STEPS: StepConfig[] = [
         showDebtStack: true,
         flashZero: true,
       },
-      // Line 5: Capital gain revealed
+      // Line 6: Capital gain revealed — the $15K excess
       {
-        atLine: 5,
+        atLine: 6,
         sections: [
           { id: "debt", label: "Debt Basis (Restored)", amount: 30000, color: "purple", stack: "debt" },
         ],
